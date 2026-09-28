@@ -29,7 +29,7 @@ class Commands(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="create-op", description="testing")
-    @requires(zeus_only, in_op_thread)
+    @requires(zeus_only)
     async def _command_create_op(self, interaction: discord.Interaction):
         await interaction.response.send_modal(CreateOperationModal())
 

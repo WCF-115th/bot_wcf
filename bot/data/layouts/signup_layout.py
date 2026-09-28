@@ -24,12 +24,16 @@ SIGNUP_MESSAGE = [
     "Kill 3 billion people {username}",
     "A femboy is going to pounce on {username} during the op",
     "this guy loves cakes {username}",
-    "get a JOB {username}",
+    "get a JOB   {username}",
     "1v1 me dust 2 {username}",
     "by signing up, you agree to being shot violently at your home address {username}",
     "this person is pretentious --->{username}",
     "this person has 2000h on vrchat ----> {username}",
     "{username} is a horrible pilot - Spindly",
+    "This guy is a stupid french fuck who will overdose you with Fent ----> {username}",
+    "This guy is a cag larper -----> {username}",
+    "This guy sucks at tarkov -----> {username}",
+    "This guy will give you pervitn in pre-op ------> {username}",
 ]
 
 
