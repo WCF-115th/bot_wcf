@@ -1,4 +1,5 @@
 import traceback
+from datetime import datetime
 from functools import partial
 
 import discord
@@ -7,6 +8,12 @@ from bot.data.models import Operation
 from bot.services.operations import create_operation, link_operation_sheet
 from bot.services.sheets import spreadsheet_url
 from bot.utils.messageui.layouts import *
+
+
+def _format_discord_date(date_str: str, fmt: str = "d") -> str:
+    dt = datetime.strptime(date_str, "%d/%m/%y")
+    timestamp = int(dt.timestamp())
+    return f"<t:{timestamp}:{fmt}>"
 
 
 class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
@@ -39,12 +46,13 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
 
     async def on_submit(self, interaction: discord.Interaction):
         thread_id = interaction.channel_id
+        discord_date = _format_discord_date(self.date.value)
         try:
             id = await create_operation(
                 self.name.value,
                 self.lore.value,
                 self.arsenal.value,
-                self.date.value,
+                discord_date,
                 thread_id,
             )
 

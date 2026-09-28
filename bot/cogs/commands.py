@@ -115,7 +115,7 @@ class Commands(commands.Cog):
     async def _command_resendopmessage(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
         await interaction.channel.send(view=DisplayOperation(operation))
-        await interaction.response("Operation message resent!")
+        await interaction.response.send_message("Operation message resent!")
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):
