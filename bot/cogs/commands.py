@@ -102,8 +102,8 @@ class Commands(commands.Cog):
         self, interaction: discord.Interaction, roster_link: str
     ):
         await interaction.response.defer(ephemeral=True)
-        await asyncio.to_thread(sync_roster, roster_link, interaction.guild_id)
-        await interaction.followup.send("Roster synced!")
+        count = await sync_roster(roster_link, interaction.guild_id)
+        await interaction.followup.send(f"Roster synced ({count} entries).")
 
     @app_commands.command(name="dropout", description="testing")
     @requires(in_op_thread)
