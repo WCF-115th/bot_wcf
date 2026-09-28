@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from pathlib import Path
@@ -14,9 +15,24 @@ SCOPES = [
 ]
 
 
-SERVICE_ACCOUNT_FILE = str(
+SERVICE_ACCOUNT_FILE = (
     Path(__file__).resolve().parents[2] / "credentials" / "google-service-account.json"
 )
+
+
+def _load_credentials() -> Credentials:
+    if SERVICE_ACCOUNT_FILE.exists():
+        return Credentials.from_service_account_file(
+            str(SERVICE_ACCOUNT_FILE), scopes=SCOPES
+        )
+
+    raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if not raw:
+        raise RuntimeError(
+            "No service account found: missing credentials file and GOOGLE_SERVICE_ACCOUNT_JSON env var"
+        )
+    return Credentials.from_service_account_info(json.loads(raw), scopes=SCOPES)
+
 
 _sheets_service = None
 
@@ -32,10 +48,7 @@ async def init_sheets():
 
     global _sheets_service, _drive_service
 
-    credentials = Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=SCOPES,
-    )
+    credentials = _load_credentials()
 
     _sheets_service = build(
         "sheets",
