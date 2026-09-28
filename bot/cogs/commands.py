@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.data.callbacks.signup_callbacks import drop_out_callback
-from bot.data.layouts.help_layout import HelpLayout
+from bot.data.layouts.
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
 from bot.data.layouts.signup_layout import Signup
 from bot.data.models import Operation
