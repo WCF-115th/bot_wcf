@@ -63,7 +63,7 @@ async def drop_out_callback(interaction: discord.Interaction, answers: dict):
         )
         return
 
-    await interaction.response.edit_message(view=ProcessingView())
+    await interaction.response.send_message(view=ProcessingView())
 
     roster_row = await get_row(
         "roster", {"guild_id": interaction.guild_id, "user_id": interaction.user.id}

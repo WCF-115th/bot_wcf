@@ -67,14 +67,6 @@ class Commands(commands.Cog):
         except Exception:
             print(traceback.format_exc())
 
-    @app_commands.command(name="testcerts", description="testing")
-    @requires(zeus_only, in_op_thread)
-    async def _command_testcerts(self, interaction: discord.Interaction):
-        try:
-            generate_certifications(interaction.user)
-        except Exception:
-            print(traceback.format_exc())
-
     @app_commands.command(name="updateroles", description="testing")
     @requires(zeus_only, in_op_thread)
     async def _command_updateroles(self, interaction: discord.Interaction):
