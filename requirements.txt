@@ -2,6 +2,9 @@ discord.py
 python-dotenv
 flask
 aiosqlite
-pytest_asyncio
 pytest
 libsql_client
+requests
+google-auth
+google-api-python-client
+
