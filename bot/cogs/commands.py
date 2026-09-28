@@ -110,6 +110,10 @@ class Commands(commands.Cog):
     async def _command_dropout(self, interaction: discord.Interaction):
         await drop_out_callback(interaction, {})
 
+    @commands.Cog.listener()
+    async def on_thread_create(self, thread: discord.Thread):
+        await thread.join()
+
 
 async def setup(bot):
     await bot.add_cog(Commands(bot))
