@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.data.callbacks.signup_callbacks import drop_out_callback
+from bot.data.layouts.help_layout import HelpLayout
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
 from bot.data.layouts.signup_layout import Signup
 from bot.data.models import Operation
@@ -111,11 +112,17 @@ class Commands(commands.Cog):
         await drop_out_callback(interaction, {})
 
     @app_commands.command(name="resendopmessage", description="testing")
-    @requires(in_op_thread)
+    @requires(zeus_only, in_op_thread)
     async def _command_resendopmessage(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
         await interaction.channel.send(view=DisplayOperation(operation))
         await interaction.response.send_message("Operation message resent!")
+
+    @app_commands.command(name="help", description="testing")
+    async def _command_help(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            view=HelpLayout(interaction), ephemeral=True
+        )
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):
