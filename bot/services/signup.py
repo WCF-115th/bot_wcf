@@ -81,12 +81,12 @@ def upsert_signup_row(
     )
 
     cells = [
-        (username_col, f"'{username}"),
+        (username_col, f"{username}"),
         (role_cols[0], role1),
         (role_cols[1], role2),
         (role_cols[2], role3),
     ]
-
+    discord_log(f"🔎 Cells prepared for Sheets:\n" f"`{cells!r}`")
     write_row_cells(spreadsheet_id, sheet_name, target_row, cells)
 
 

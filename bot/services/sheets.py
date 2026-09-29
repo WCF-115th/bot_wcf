@@ -413,6 +413,13 @@ def find_row_by_value_or_empty(
 def write_row_cells(
     spreadsheet_id: str, sheet_name: str, row: int, cells: list[tuple[int, str]]
 ):
+    discord_log(
+        f"🔎 write_row_cells received:\n"
+        f"spreadsheet_id={spreadsheet_id!r}\n"
+        f"sheet_name={sheet_name!r}\n"
+        f"row={row!r}\n"
+        f"cells={cells!r}"
+    )
     """
     Writes {col_index: value} pairs to specific cells in one row via a
     single batch update.
@@ -420,6 +427,7 @@ def write_row_cells(
     updates = [
         (f"{sheet_name}!{_col_letter(col)}{row}", [[value]]) for col, value in cells
     ]
+    discord_log(f"🔎 Updates generated:\n" f"{updates!r}")
     batch_update_values(spreadsheet_id, updates)
 
 
