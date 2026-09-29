@@ -123,13 +123,13 @@ def DropOut(interaction):
 
 
 @layout
-def SignupList(operation: Operation):
+def SignupList(operation: Operation, signup_list):
     items = [
         create_text(f"#{operation.name}"),
         create_text(
             f"**Signed-up:**",
         ),
-        create_text(generate_signuplist(operation)),
+        create_text(signup_list),
     ]
     return {"items": items}
 

@@ -9,7 +9,7 @@ from discord.ext import commands
 from bot.data.callbacks.signup_callbacks import drop_out_callback
 from bot.data.layouts.help_layout import HelpLayout
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
-from bot.data.layouts.signup_layout import Signup, SignupList
+from bot.data.layouts.signup_layout import Signup, SignupList, generate_signuplist
 from bot.data.models import Operation
 from bot.services import operations
 from bot.services.db.queries_tur import get_row
@@ -131,7 +131,8 @@ class Commands(commands.Cog):
     @requires(zeus_only, in_op_thread)
     async def _command_signuplist(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
-        await interaction.response.send_message(view=SignupList(operation))
+        signup_list = generate_signuplist(operation)
+        await interaction.response.send_message(view=SignupList(operation, signup_list))
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):
