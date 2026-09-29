@@ -131,6 +131,7 @@ def SignupList(operation: Operation):
         ),
         create_text(generate_signuplist(operation)),
     ]
+    return {"items": items}
 
 
 async def generate_signuplist(operation: Operation) -> str:
