@@ -5,6 +5,7 @@ import discord
 from bot.data.models import Operation
 from bot.services.db.queries_tur import get_row, upsert_row_ai
 from bot.services.role_handling import extract_roles
+from bot.services.sheets import discord_log
 from bot.services.signup import drop_signup, upsert_signup_row
 from bot.utils.messageui.components import *
 from bot.utils.messageui.layouts import layout
@@ -31,6 +32,14 @@ async def signup_callback(interaction: discord.Interaction, answers: dict):
         role1=role1,
         role2=role2,
         role3=role3,
+    )
+    discord_log(
+        f"📋 Signup values before Sheets update:\n"
+        f"spreadsheet_id=`{operation.spreadsheet_id}`\n"
+        f"roster_name=`{roster_name!r}`\n"
+        f"role1=`{role1!r}`\n"
+        f"role2=`{role2!r}`\n"
+        f"role3=`{role3!r}`"
     )
     await asyncio.to_thread(
         upsert_signup_row,
