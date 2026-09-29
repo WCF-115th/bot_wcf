@@ -5,6 +5,7 @@ import discord
 
 from bot.data.callbacks.signup_callbacks import drop_out_callback, signup_callback
 from bot.data.models import Operation
+from bot.services.db.queries_tur import get_rows
 from bot.services.signup import generate_certifications
 from bot.utils.messageui.components import *
 from bot.utils.messageui.layouts import BaseLayoutV1, layout
@@ -119,3 +120,21 @@ def SignedUp(interaction: discord.Interaction):
 def DropOut(interaction):
     items = [create_text(f"{interaction.user.mention} droped outed!")]
     return {"items": items}
+
+
+@layout
+def SignupList(operation: Operation):
+    items = [
+        create_text(f"#{operation.name}"),
+        create_text(
+            f"**Signed-up:**",
+        ),
+        create_text(generate_signuplist(operation)),
+    ]
+
+
+async def generate_signuplist(operation: Operation) -> str:
+    rows = await get_rows("signups", {"operation_id": operation.id})
+    if not rows:
+        return "No signups yet."
+    return "\n".join(f"- {row['roster_name']}" for row in rows)
