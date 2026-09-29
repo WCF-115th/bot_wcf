@@ -131,7 +131,7 @@ class Commands(commands.Cog):
     @requires(zeus_only, in_op_thread)
     async def _command_signuplist(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
-        signup_list = generate_signuplist(operation)
+        signup_list = await generate_signuplist(operation)
         await interaction.response.send_message(view=SignupList(operation, signup_list))
 
     @commands.Cog.listener()
