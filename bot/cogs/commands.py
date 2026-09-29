@@ -30,7 +30,7 @@ class Commands(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="create-op", description="testing")
-    @requires(zeus_only)
+    @requires(zeus_only, not_in_op_thread)
     async def _command_create_op(self, interaction: discord.Interaction):
         await interaction.response.send_modal(CreateOperationModal())
 
@@ -116,7 +116,9 @@ class Commands(commands.Cog):
     async def _command_resendopmessage(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
         await interaction.channel.send(view=DisplayOperation(operation))
-        await interaction.response.send_message("Operation message resent!")
+        await interaction.response.send_message(
+            "Operation message resent!", ephemeral=True
+        )
 
     @app_commands.command(name="help", description="testing")
     async def _command_help(self, interaction: discord.Interaction):

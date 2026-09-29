@@ -45,3 +45,10 @@ async def in_op_thread(interaction: discord.Interaction):
     if operation is None:
         return False, "No operation found in this channel."
     return True, None
+
+
+async def not_in_op_thread(interaction: discord.Interaction):
+    operation = await Operation.fetch_by_thread(interaction.channel_id)
+    if operation is not None:
+        return False, "There is already an existing operation in this channel."
+    return True, None

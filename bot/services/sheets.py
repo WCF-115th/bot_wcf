@@ -8,7 +8,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 SHEET_ID_RE = re.compile(r"/spreadsheets/d/([a-zA-Z0-9_-]+)")
+import logging
 
+import requests
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -246,13 +248,40 @@ def spreadsheet_url(spreadsheet_id: str) -> str:
     return f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit"
 
 
-def batch_update_values(spreadsheet_id: str, updates: list[tuple[str, list[list]]]):
+DISCORD_LOG_WEBHOOK = os.getenv("DISCORD_LOG_WEBHOOK")
+
+
+def discord_log(message: str):
+    """Send a log message to Discord."""
+    if not DISCORD_LOG_WEBHOOK:
+        return
+
+    try:
+        requests.post(
+            DISCORD_LOG_WEBHOOK,
+            json={"content": message[:2000]},
+            timeout=5,
+        )
+    except Exception as e:
+        # Don't let Discord logging break the bot itself
+        logging.exception("Failed to send log to Discord: %s", e)
+
+
+def batch_update_values(
+    spreadsheet_id: str,
+    updates: list[tuple[str, list[list]]],
+):
     """
     Updates multiple ranges in one API call.
 
     Args:
-        updates: list of (range_name, values) pairs, e.g.
-            [("Signup!B4", [["Machine Gunner"]]), ("Signup!C4", [["Squad Leader"]])]
+        updates:
+            List of (range_name, values) pairs.
+            Example:
+                [
+                    ("Signup!B4", [["Machine Gunner"]]),
+                    ("Signup!C4", [["Squad Leader"]])
+                ]
     """
     service = _get_sheets_connection()
 
@@ -263,12 +292,47 @@ def batch_update_values(spreadsheet_id: str, updates: list[tuple[str, list[list]
         ],
     }
 
-    return (
-        service.spreadsheets()
-        .values()
-        .batchUpdate(spreadsheetId=spreadsheet_id, body=body)
-        .execute()
-    )
+    try:
+        result = (
+            service.spreadsheets()
+            .values()
+            .batchUpdate(
+                spreadsheetId=spreadsheet_id,
+                body=body,
+            )
+            .execute()
+        )
+
+        return result
+
+    except HttpError as e:
+        # Google normally puts the useful diagnostic information here
+        try:
+            google_error = e.content.decode("utf-8")
+        except Exception:
+            google_error = str(e.content)
+
+        discord_log(
+            "🚨 **Google Sheets API Error**\n"
+            f"**HTTP status:** `{e.resp.status}`\n"
+            f"**Spreadsheet:** `{spreadsheet_id}`\n"
+            f"**Updates:** `{updates}`\n"
+            f"**Google response:**\n```json\n{google_error[:1500]}\n```"
+        )
+
+        # Keep raising the exception so your bot's normal error handling
+        # still knows the operation failed.
+        raise
+
+    except Exception as e:
+        discord_log(
+            "🚨 **Unexpected Sheets Error**\n"
+            f"**Spreadsheet:** `{spreadsheet_id}`\n"
+            f"**Error:** `{type(e).__name__}: {e}`\n"
+            f"**Updates:** `{updates}`"
+        )
+
+        raise
 
 
 def find_header_map(
