@@ -127,9 +127,9 @@ class Commands(commands.Cog):
             view=HelpLayout(interaction), ephemeral=True
         )
 
-    @app_commands.command(name="signuplist", description="testing")
+    @app_commands.command(name="listslots", description="testing")
     @requires(zeus_only, in_op_thread)
-    async def _command_signuplist(self, interaction: discord.Interaction):
+    async def _command_listslots(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
         signup_list = await generate_signuplist(operation)
         await interaction.response.send_message(view=SignupList(operation, signup_list))

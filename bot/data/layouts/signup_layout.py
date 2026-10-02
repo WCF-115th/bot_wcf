@@ -125,7 +125,7 @@ def DropOut(interaction):
 @layout
 def SignupList(operation: Operation, signup_list):
     items = [
-        create_text(f"#{operation.name}"),
+        create_text(f"# {operation.name}"),
         create_text(
             f"**Signed-up:**",
         ),
