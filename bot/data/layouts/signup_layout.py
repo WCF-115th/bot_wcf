@@ -118,8 +118,8 @@ def SignedUp(interaction: discord.Interaction):
 
 @layout
 def DropOut(interaction):
-    items = [create_text(f"{interaction.user.mention} droped outed!")]
-    return {"items": items}
+    items = [create_text(f"{interaction.user.mention} dropped out!")]
+    return {"accent": discord.Color.red(), "items": items}
 
 
 @layout
