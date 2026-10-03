@@ -20,14 +20,14 @@ async def signup_callback(interaction: discord.Interaction, answers: dict):
     role1, role2, role3 = extract_roles(answers)
 
     existing = await get_row(
-        "signups", {"operation_id": operation.id, "user_id": interaction.user.id}
+        "signups", {"operation_id": operation.id, "discord_id": interaction.user.id}
     )
 
     await upsert_row_ai(
         "signups",
-        "operation_id,user_id",
+        "operation_id,discord_id",
         operation_id=operation.id,
-        user_id=interaction.user.id,
+        discord_id=interaction.user.id,
         roster_name=roster_name,
         role1=role1,
         role2=role2,
@@ -63,7 +63,7 @@ async def drop_out_callback(interaction: discord.Interaction, answers: dict):
     operation = await Operation.fetch_by_thread(interaction.channel_id)
 
     existing = await get_row(
-        "signups", {"operation_id": operation.id, "user_id": interaction.user.id}
+        "signups", {"operation_id": operation.id, "discord_id": interaction.user.id}
     )
 
     if existing is None:
@@ -75,7 +75,7 @@ async def drop_out_callback(interaction: discord.Interaction, answers: dict):
     await interaction.response.send_message(view=ProcessingView(), ephemeral=True)
 
     roster_row = await get_row(
-        "roster", {"guild_id": interaction.guild_id, "user_id": interaction.user.id}
+        "roster", {"guild_id": interaction.guild_id, "discord_id": interaction.user.id}
     )
 
     roster_name = roster_row["roster_name"] if roster_row else interaction.user.name

@@ -26,21 +26,21 @@ def generate_certifications(member: discord.Member):
 
 
 async def get_user_signup_roles(
-    operation_id: int, user_id: int
+    operation_id: int, discord_id: int
 ) -> tuple[str | None, str | None, str | None]:
     signup = await get_row(
-        "signups", {"operation_id": operation_id, "user_id": user_id}
+        "signups", {"operation_id": operation_id, "discord_id": discord_id}
     )
     if signup is None:
         return None, None, None
     return signup["role1"], signup["role2"], signup["role3"]
 
 
-async def drop_signup(operation, user_id: int, guild_id: int, roster_name: str):
+async def drop_signup(operation, discord_id: int, guild_id: int, roster_name: str):
     """
     Removes a signup from both the DB and the signup sheet.
     """
-    await delete_signup(operation.id, user_id)
+    await delete_signup(operation.id, discord_id)
 
     try:
         await asyncio.to_thread(drop_signup_row, operation.spreadsheet_id, roster_name)

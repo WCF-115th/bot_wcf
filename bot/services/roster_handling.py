@@ -31,16 +31,17 @@ async def sync_roster(
     count = 0
     for row in values:
         name = row[name_col].strip() if len(row) > name_col else ""
-        user_id = row[id_col].strip() if len(row) > id_col else ""
+        discord_id = row[id_col].strip() if len(row) > id_col else ""
 
-        if not name or not user_id:
+        if not name or not discord_id:
             continue
 
+        print(f"upserting {name} / {discord_id}")
         await upsert_row_ai(
             "roster",
-            "guild_id,user_id",
+            "guild_id,discord_id",
             guild_id=guild_id,
-            user_id=int(user_id),
+            discord_id=int(discord_id),
             roster_name=name,
         )
         count += 1
@@ -48,6 +49,6 @@ async def sync_roster(
     return count
 
 
-async def get_roster_name(guild_id: int, user_id: int, fallback: str) -> str:
-    row = await get_row("roster", {"guild_id": guild_id, "user_id": user_id})
+async def get_roster_name(guild_id: int, discord_id: int, fallback: str) -> str:
+    row = await get_row("roster", {"guild_id": guild_id, "discord_id": discord_id})
     return row["roster_name"] if row else fallback

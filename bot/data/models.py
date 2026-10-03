@@ -38,21 +38,23 @@ SCHEMA = {
     "signups": {
         "columns": {
             "operation_id": "INTEGER",
-            "user_id": "INTEGER",
+            "discord_id": "INTEGER",
             "roster_name": "TEXT",
             "role1": "TEXT",
             "role2": "TEXT",
             "role3": "TEXT",
         },
-        "primary_key": ["operation_id", "user_id"],
+        "primary_key": ["operation_id", "discord_id"],
     },
     "roster": {
         "columns": {
             "guild_id": "INTEGER",
-            "user_id": "INTEGER",
+            "discord_id": "INTEGER",
             "roster_name": "TEXT",
+            "a_strikes": "INTEGER DEFAULT 0",
+            "b_strikes": "INTEGER DEFAULT 0",
         },
-        "primary_key": ["guild_id", "user_id"],
+        "primary_key": ["guild_id", "discord_id"],
     },
 }
 
@@ -87,6 +89,24 @@ class Operation:
         from bot.services.db.queries_tur import get_row
 
         row = await get_row("operations", {"signup_thread_id": thread_id})
+        if row is None:
+            return None
+        return cls(**row)
+
+
+@dataclass
+class Player:
+    guild_id: int
+    discord_id: int
+    roster_name: str
+    a_strikes: int
+    b_strikes: int
+
+    @classmethod
+    async def fetch(cls, guild_id: int, discord_id: int) -> "Player | None":
+        from bot.services.db.queries_tur import get_row
+
+        row = await get_row("roster", {"guild_id": guild_id, "discord_id": discord_id})
         if row is None:
             return None
         return cls(**row)

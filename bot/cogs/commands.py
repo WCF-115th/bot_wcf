@@ -10,7 +10,8 @@ from bot.data.callbacks.signup_callbacks import drop_out_callback
 from bot.data.layouts.help_layout import HelpLayout
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
 from bot.data.layouts.signup_layout import Signup, SignupList, generate_signuplist
-from bot.data.models import Operation
+from bot.data.layouts.strike_layout import StrikeLayout
+from bot.data.models import Operation, Player
 from bot.services import operations
 from bot.services.db.queries_tur import get_row
 from bot.services.operations import upsert_row
@@ -137,6 +138,18 @@ class Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):
         await thread.join()
+
+    @app_commands.command(name="strike", description="Give a player a strike")
+    async def _command_strike(
+        self, interaction: discord.Interaction, member: discord.Member
+    ):
+        try:
+            player = await Player.fetch(interaction.guild_id, member.id)
+            await interaction.response.send_message(
+                view=StrikeLayout(player), ephemeral=True
+            )
+        except Exception:
+            print(traceback.format_exc())
 
 
 async def setup(bot):
