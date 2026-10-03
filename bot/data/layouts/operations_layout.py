@@ -117,7 +117,7 @@ class SheetLinkModal(discord.ui.Modal, title="Link Sheet"):
             await interaction.followup.send(msg, ephemeral=True)
 
             operation = await Operation.fetch(self.operation_id)
-            await interaction.message.edit(view=DisplayOperation(operation))
+            await interaction.message.edit("Operation post succesfully created!")
         except Exception:
             import traceback
 

@@ -112,9 +112,9 @@ class Commands(commands.Cog):
     async def _command_dropout(self, interaction: discord.Interaction):
         await drop_out_callback(interaction, {})
 
-    @app_commands.command(name="resendopmessage", description="testing")
+    @app_commands.command(name="sendopmessage", description="testing")
     @requires(zeus_only, in_op_thread)
-    async def _command_resendopmessage(self, interaction: discord.Interaction):
+    async def _command_sendopmessage(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
         await interaction.channel.send(view=DisplayOperation(operation))
         await interaction.response.send_message(
