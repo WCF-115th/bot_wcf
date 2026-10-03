@@ -20,15 +20,20 @@ def _make_strike_button(label, style, **kwargs):
 @layout
 def StrikeLayout(player: Player):
     items = [
-        create_text(f"{player.roster_name}"),
-        create_text(f"\u200b- Behaviour strikes: {player.b_strikes}"),
-        create_text(f"\u200b- Attendance strikes: {player.a_strikes}"),
-    ]  # whatever this already has
+        create_text(f"""
+# 📋 Strike Record
+
+**{player.roster_name}**
+
+> 🟥 Behaviour strikes: **{player.b_strikes}**
+> 🟨 Attendance strikes: **{player.a_strikes}**
+"""),
+    ]
 
     row = ui.ActionRow()
     row.add_item(
         _make_strike_button(
-            "Add attendance strike",
+            "➕ Attendance",
             discord.ButtonStyle.success,
             amount=1,
             player=player,
@@ -37,16 +42,7 @@ def StrikeLayout(player: Player):
     )
     row.add_item(
         _make_strike_button(
-            "Add behaviour strike",
-            discord.ButtonStyle.success,
-            amount=1,
-            player=player,
-            strike_type="behaviour",
-        )
-    )
-    row.add_item(
-        _make_strike_button(
-            "Remove attendance strike",
+            "➖ Attendance",
             discord.ButtonStyle.danger,
             amount=-1,
             player=player,
@@ -55,7 +51,16 @@ def StrikeLayout(player: Player):
     )
     row.add_item(
         _make_strike_button(
-            "Remove behaviour strike",
+            "➕ Behaviour",
+            discord.ButtonStyle.success,
+            amount=1,
+            player=player,
+            strike_type="behaviour",
+        )
+    )
+    row.add_item(
+        _make_strike_button(
+            "➖ Behaviour",
             discord.ButtonStyle.danger,
             amount=-1,
             player=player,

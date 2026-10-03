@@ -66,16 +66,22 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
 
 @layout
 def SheetLinking(operation_id: int):
-    items = [create_text("""
-1. Open the template: https://docs.google.com/spreadsheets/d/1Esp4debnAbhl5zJOQpVIu4gtmMDHvHhy3LyVJ8c6aGM/copy
-2. Click File > Make a copy (or Ctrl+Alt+Shift+C)
-3. Rename the copy with your op's name
-4. Click the Share button (top right)
-5. Paste this email and give it editor access: `wcf-service@wcf-bot.iam.gserviceaccount.com`
-6. Click Send (no need to notify)
-7. Copy your sheet's link (Copy link button, or just the URL bar)
-8. Come back here and click on 'I've shared it'
-""")]
+    items = [
+        create_text("""
+# 📋 Link your Attendance & ORBAT sheet
+
+1. Open the template and click **Make a copy**
+2. Rename the copy with your op's name
+3. Click **Share** (top right)
+4. Paste this email and give it **Editor** access:
+`wcf-service@wcf-bot.iam.gserviceaccount.com`
+5. Click **Send** (no need to notify)
+6. Copy your sheet's link
+7. Come back here and click **I've shared it**
+
+-# [Open the template](https://docs.google.com/spreadsheets/d/1Esp4debnAbhl5zJOQpVIu4gtmMDHvHhy3LyVJ8c6aGM/copy)
+"""),
+    ]
 
     extra = [
         create_button(
@@ -137,9 +143,9 @@ def DisplayOperation(operation: Operation):
 **Loadout**
 > {operation.arsenal}
 
-To sign up do `/signup` and follow the prompts.
-
 -# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})
-    """),
+"""),
+        create_separator(),
+        create_text("To sign up do `/signup` and follow the prompts."),
     ]
     return {"items": items}

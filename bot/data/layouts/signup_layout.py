@@ -43,23 +43,27 @@ def Signup(
     user: discord.User,
     operation: Operation,
     *,
-    available_role: list[str] | None,
+    available_role: dict[str, str] | None,
     role1: str | None = None,
     role2: str | None = None,
     role3: str | None = None,
     roster_name: str | None = None,
 ):
-
     def _format_certifications(earned: list[str]) -> str:
-        lines = "\n".join(f'> • "{cert}"' for cert in earned)
+        if not earned:
+            return "**Certifications**\n> None"
+        lines = "\n".join(f"> ✅ {cert}" for cert in earned)
         return f"**Certifications**\n{lines}"
 
     items = [
         create_text(f"-# {user.name}"),
-        create_text(f"# 🪖 Operation Signup\n"),
-        create_text(f"**Operation**\n> {operation.name}\n"),
-        create_text(f"{_format_certifications(generate_certifications(user))}\n"),
-        create_text(f"Select your preferred role below to continue."),
+        create_text(f"""
+# 🪖 {operation.name}
+
+{_format_certifications(generate_certifications(user))}
+
+Select your preferred roles below, in order of priority.
+"""),
     ]
 
     def _role_options(all_roles: dict[str, str], selected: str | None):
@@ -68,35 +72,26 @@ def Signup(
             for r, desc in all_roles.items()
         ]
 
-    # Select menus creation
-    items.append(
-        create_select_menu(
-            *_role_options(available_role, role1),
-            placeholder="1st choice",
-            id="role_select_1",
+    choices = [role1, role2, role3]
+    labels = ["🥇 1st choice", "🥈 2nd choice", "🥉 3rd choice"]
+
+    for i, (label, selected) in enumerate(zip(labels, choices), start=1):
+        items.append(
+            create_select_menu(
+                *_role_options(available_role, selected),
+                placeholder=label,
+                id=f"role_select_{i}",
+            )
         )
-    )
-    items.append(
-        create_select_menu(
-            *_role_options(available_role, role2),
-            placeholder="2nd choice",
-            id="role_select_2",
-        )
-    )
-    items.append(
-        create_select_menu(
-            *_role_options(available_role, role3),
-            placeholder="3rd choice",
-            id="role_select_3",
-        )
-    )
 
     extra = [
         create_button(
-            label="Sign up", style=discord.ButtonStyle.success, callback=signup_callback
+            label="✅ Sign up",
+            style=discord.ButtonStyle.success,
+            callback=signup_callback,
         ),
         create_button(
-            label="Drop out",
+            label="🚪 Drop out",
             style=discord.ButtonStyle.danger,
             callback=drop_out_callback,
         ),
@@ -123,13 +118,14 @@ def DropOut(interaction):
 
 
 @layout
-def SignupList(operation: Operation, signup_list):
+def SignupList(operation: Operation, signup_list: str):
     items = [
-        create_text(f"# {operation.name}"),
-        create_text(
-            f"**Signed-up:**",
-        ),
-        create_text(signup_list),
+        create_text(f"""
+# 📋 {operation.name}
+
+**Signed-up operators**
+{signup_list}
+"""),
     ]
     return {"items": items}
 
@@ -137,5 +133,5 @@ def SignupList(operation: Operation, signup_list):
 async def generate_signuplist(operation: Operation) -> str:
     rows = await get_rows("signups", {"operation_id": operation.id})
     if not rows:
-        return "No signups yet."
-    return "\n".join(f"\u200b- {row['roster_name']}" for row in rows)
+        return "> No signups yet."
+    return "\n".join(f"> • {row['roster_name']}" for row in rows)

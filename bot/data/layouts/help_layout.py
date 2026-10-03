@@ -4,18 +4,23 @@ from bot.utils.messageui.layouts import *
 
 @layout
 def HelpLayout(interaction: discord.Interaction):
-    items = [create_text("""
-# Need help? Heres how I work:
+    items = [
+        create_text("""
+# ❓ Need help? Here's how I work
 
-**Operation Maintenance**
-To signup to an op do `/signup` and fill in your wanted roles
-To drop out, either do `/dropout` or drop out from the signup screen
-""")]
+**Signing up**
+> `/signup` — pick your preferred roles for an operation
+> `/dropout` — leave the op, either with this or the drop out button on the signup screen
+"""),
+    ]
+
     if has_zeus_role(interaction.user):
+        items.append(create_separator())
         items.append(create_text("""
-**Zeus only:**
-To create an operation do `/create-op` and follow the instructions
-To change available roles go to your ops sheet, remove the unwanted roles from the roles list and do `/updateroles`
-To send a custom embed operation announcement do `/sendopmessage`
+**⚡ Zeus only**
+> `/create-op` — create a new operation and follow the prompts
+> `/updateroles` — sync available roles after editing the Roles list on your op sheet
+> `/sendopmessage` — post a custom embed announcing the operation
 """))
+
     return {"items": items}
