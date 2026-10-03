@@ -138,4 +138,4 @@ async def generate_signuplist(operation: Operation) -> str:
     rows = await get_rows("signups", {"operation_id": operation.id})
     if not rows:
         return "No signups yet."
-    return "\n".join(f"- {row['roster_name']}" for row in rows)
+    return "\n".join(f"\u200b- {row['roster_name']}" for row in rows)
