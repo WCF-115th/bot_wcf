@@ -312,26 +312,8 @@ def batch_update_values(
         except Exception:
             google_error = str(e.content)
 
-        discord_log(
-            "🚨 **Google Sheets API Error**\n"
-            f"**HTTP status:** `{e.resp.status}`\n"
-            f"**Spreadsheet:** `{spreadsheet_id}`\n"
-            f"**Updates:** `{updates}`\n"
-            f"**Google response:**\n```json\n{google_error[:1500]}\n```"
-        )
-
         # Keep raising the exception so your bot's normal error handling
         # still knows the operation failed.
-        raise
-
-    except Exception as e:
-        discord_log(
-            "🚨 **Unexpected Sheets Error**\n"
-            f"**Spreadsheet:** `{spreadsheet_id}`\n"
-            f"**Error:** `{type(e).__name__}: {e}`\n"
-            f"**Updates:** `{updates}`"
-        )
-
         raise
 
 
@@ -413,13 +395,6 @@ def find_row_by_value_or_empty(
 def write_row_cells(
     spreadsheet_id: str, sheet_name: str, row: int, cells: list[tuple[int, str]]
 ):
-    discord_log(
-        f"🔎 write_row_cells received:\n"
-        f"spreadsheet_id={spreadsheet_id!r}\n"
-        f"sheet_name={sheet_name!r}\n"
-        f"row={row!r}\n"
-        f"cells={cells!r}"
-    )
     """
     Writes {col_index: value} pairs to specific cells in one row via a
     single batch update.
@@ -427,7 +402,6 @@ def write_row_cells(
     updates = [
         (f"{sheet_name}!{_col_letter(col)}{row}", [[value]]) for col, value in cells
     ]
-    discord_log(f"🔎 Updates generated:\n" f"{updates!r}")
     batch_update_values(spreadsheet_id, updates)
 
 

@@ -33,14 +33,6 @@ async def signup_callback(interaction: discord.Interaction, answers: dict):
         role2=role2,
         role3=role3,
     )
-    discord_log(
-        f"📋 Signup values before Sheets update:\n"
-        f"spreadsheet_id=`{operation.spreadsheet_id}`\n"
-        f"roster_name=`{roster_name!r}`\n"
-        f"role1=`{role1!r}`\n"
-        f"role2=`{role2!r}`\n"
-        f"role3=`{role3!r}`"
-    )
     await asyncio.to_thread(
         upsert_signup_row,
         operation.spreadsheet_id,

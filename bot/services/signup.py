@@ -57,14 +57,6 @@ def upsert_signup_row(
     *,
     sheet_name: str = "Signup",
 ):
-    discord_log(
-        f"📋 Signup values before Sheets update:\n"
-        f"spreadsheet_id=`{spreadsheet_id}`\n"
-        f"roster_name=`{username!r}`\n"
-        f"role1=`{role1!r}`\n"
-        f"role2=`{role2!r}`\n"
-        f"role3=`{role3!r}`"
-    )
     col_map, header_row = find_header_map(
         spreadsheet_id, sheet_name, set(SIGNUP_COLUMNS.values())
     )
@@ -86,7 +78,6 @@ def upsert_signup_row(
         (role_cols[1], role2),
         (role_cols[2], role3),
     ]
-    discord_log(f"🔎 Cells prepared for Sheets:\n" f"`{cells!r}`")
     write_row_cells(spreadsheet_id, sheet_name, target_row, cells)
 
 

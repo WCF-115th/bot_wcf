@@ -2,15 +2,7 @@ import functools
 
 import discord
 
-from bot.data.models import Operation
-
-OPERATION_MANAGEMENT_ROLES = [
-    1473796269800685658,
-    1473746808093016125,
-    1473330484812582952,
-    1473330569877389430,
-    1473330648344170587,
-]
+from bot.data.models import OPERATION_MANAGEMENT_ROLES, Operation
 
 
 def requires(*checks):
