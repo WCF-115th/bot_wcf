@@ -66,10 +66,13 @@ async def main():
         try:
             await bot.start(os.getenv("DISCORD_TOKEN"))
         except discord.errors.HTTPException as e:
-            print(f"status: {e.status}")
-            print(f"code: {e.code}")
-            print(f"text: {e.text}")
-            print(f"response headers: {dict(e.response.headers)}")
+            if e.status == 429:
+                retry_after = int(e.response.headers.get("Retry-After", 60))
+                print(
+                    f"Rate limited, sleeping {retry_after}s before any further action"
+                )
+                await asyncio.sleep(retry_after + 30)
+                print("Done sleeping, please redeploy manually now")
             raise
 
 
