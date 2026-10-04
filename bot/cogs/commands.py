@@ -111,7 +111,10 @@ class Commands(commands.Cog):
     @app_commands.command(name="dropout", description="testing")
     @requires(in_op_thread)
     async def _command_dropout(self, interaction: discord.Interaction):
-        await drop_out_callback(interaction, {})
+        try:
+            await drop_out_callback(interaction, {})
+        except:
+            print(traceback.format_exc())
 
     @app_commands.command(name="sendopmessage", description="testing")
     @requires(zeus_only, in_op_thread)
@@ -135,11 +138,8 @@ class Commands(commands.Cog):
         signup_list = await generate_signuplist(operation)
         await interaction.response.send_message(view=SignupList(operation, signup_list))
 
-    @commands.Cog.listener()
-    async def on_thread_create(self, thread: discord.Thread):
-        await thread.join()
-
     @app_commands.command(name="strike", description="Give a player a strike")
+    @requires(zeus_only)
     async def _command_strike(
         self, interaction: discord.Interaction, member: discord.Member
     ):
@@ -150,6 +150,10 @@ class Commands(commands.Cog):
             )
         except Exception:
             print(traceback.format_exc())
+
+    @commands.Cog.listener()
+    async def on_thread_create(self, thread: discord.Thread):
+        await thread.join()
 
 
 async def setup(bot):

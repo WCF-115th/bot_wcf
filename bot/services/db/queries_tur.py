@@ -169,9 +169,9 @@ async def last_insert_rowid() -> int:
     return result.rows[0][0]
 
 
-async def delete_signup(operation_id: int, user_id: int):
+async def delete_signup(operation_id: int, discord_id: int):
     client = get_connection()
     await client.execute(
         "DELETE FROM signups WHERE operation_id = ? AND user_id = ?",
-        [operation_id, user_id],
+        [operation_id, discord_id],
     )
