@@ -63,7 +63,14 @@ async def main():
         await migrate_db()
 
         # bot startup, must be the last line of main()
-        await bot.start(os.getenv("DISCORD_TOKEN"))
+        try:
+            await bot.start(os.getenv("DISCORD_TOKEN"))
+        except discord.errors.HTTPException as e:
+            print(f"status: {e.status}")
+            print(f"code: {e.code}")
+            print(f"text: {e.text}")
+            print(f"response headers: {dict(e.response.headers)}")
+            raise
 
 
 @bot.event
