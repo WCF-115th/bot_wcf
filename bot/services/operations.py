@@ -1,5 +1,6 @@
 import asyncio
 import json
+import traceback
 from concurrent.futures import thread
 
 from bot.services.db.queries_tur import last_insert_rowid, upsert_row, upsert_row_ai
@@ -8,7 +9,7 @@ from bot.services.sheets import get_valid_sheet_id
 
 
 async def create_operation(
-    name: str, lore: str, arsenal: str, date: str, thread_id: int, image_url: str
+    name: str, lore: str, arsenal: str, date: str, image_url: str
 ):
     await upsert_row_ai(
         "operations",
@@ -17,11 +18,20 @@ async def create_operation(
         desc=lore,
         arsenal=arsenal,
         date=date,
-        signup_thread_id=thread_id,
         image_url=image_url,
     )
     id = await last_insert_rowid()
     return id
+
+
+async def add_operation_thread_id(thread_id: str, operation_id):
+    try:
+        await upsert_row_ai(
+            "operations", "id", id=operation_id, signup_thread_id=thread_id
+        )
+    except Exception:
+        print(traceback.format_exc())
+    return
 
 
 async def link_operation_sheet(operation_id: int, link: str) -> bool:

@@ -3,9 +3,14 @@ from datetime import datetime
 from functools import partial
 
 import discord
+from discord import components
 
 from bot.data.models import Operation
-from bot.services.operations import create_operation, link_operation_sheet
+from bot.services.operations import (
+    add_operation_thread_id,
+    create_operation,
+    link_operation_sheet,
+)
 from bot.services.sheets import spreadsheet_url
 from bot.utils.messageui.layouts import *
 
@@ -48,22 +53,27 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
         max_length=100,
     )
 
-    image = discord.ui.FileUpload(
-        max_values=1,
-        required=False,
+    label = discord.ui.Label(
+        text="Upload image file",
+        component=discord.ui.FileUpload(
+            max_values=5,
+            required=False,
+        ),
     )
 
     async def on_submit(self, interaction: discord.Interaction):
         try:
-            thread_id = interaction.channel_id
             discord_date = _format_discord_date(self.date.value)
             id = await create_operation(
                 self.name.value,
                 self.lore.value,
                 self.arsenal.value,
                 discord_date,
-                thread_id,
-                self.image.values[0].url if self.image.values else None,
+                (
+                    self.label.component.values[0].url
+                    if self.label.component.values
+                    else None
+                ),
             )
 
             await interaction.response.send_message(
@@ -110,6 +120,9 @@ async def confirm_callback(
     await interaction.response.send_modal(SheetLinkModal(operation_id=operation_id))
 
 
+OP_THREADS_ID = 1474849828143104193
+
+
 class SheetLinkModal(discord.ui.Modal, title="Link Sheet"):
     link = discord.ui.TextInput(
         label="Google Sheet Link",
@@ -123,21 +136,23 @@ class SheetLinkModal(discord.ui.Modal, title="Link Sheet"):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        try:
-            ok = await link_operation_sheet(self.operation_id, self.link.value)
-            msg = (
-                "Successfully linked sheet !"
-                if ok
-                else "Error, check google sheet link or permissions !"
-            )
-            await interaction.followup.send(msg, ephemeral=True)
+        ok = await link_operation_sheet(self.operation_id, self.link.value)
+        msg = (
+            "Successfully linked sheet! Operation created!"
+            if ok
+            else "Error, check google sheet link or permissions !"
+        )
+        await interaction.followup.send(msg, ephemeral=True)
+        await interaction.message.delete()
 
-            operation = await Operation.fetch(self.operation_id)
-            await interaction.message.edit("Operation post succesfully created!")
-        except Exception:
-            import traceback
-
-            print(traceback.format_exc())
+        operation = await Operation.fetch(self.operation_id)
+        op_thread = interaction.client.get_channel(OP_THREADS_ID)
+        message, thread = await op_thread.create_thread(
+            name=operation.name, view=DisplayOperation(operation)
+        )
+        await add_operation_thread_id(
+            thread.id, operation.id
+        )  # thread is actually a tuple of message, thread
 
 
 @layout
@@ -155,8 +170,16 @@ def DisplayOperation(operation: Operation):
 
 -# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})
 """),
-        create_image(operation.image_url),
-        create_separator(),
-        create_text("To sign up do `/signup` and follow the prompts."),
     ]
+
+    if operation.image_url is not None:
+        items.append(create_image(operation.image_url))
+
+    items.extend(
+        [
+            create_separator(),
+            create_text("To sign up do `/signup` and follow the prompts."),
+        ]
+    )
+
     return {"items": items}

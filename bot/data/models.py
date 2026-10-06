@@ -22,7 +22,6 @@ CERTIFICATIONS = {
     "Artillery Certified": 1473746663792443442,
 }
 
-
 SCHEMA = {
     "operations": {
         "columns": {

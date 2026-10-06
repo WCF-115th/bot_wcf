@@ -34,7 +34,10 @@ class Commands(commands.Cog):
     @app_commands.command(name="create-op", description="testing")
     @requires(zeus_only, not_in_op_thread)
     async def _command_create_op(self, interaction: discord.Interaction):
-        await interaction.response.send_modal(CreateOperationModal())
+        try:
+            await interaction.response.send_modal(CreateOperationModal())
+        except:
+            print(traceback.format_exc())
 
     @app_commands.command(name="signup", description="testing")
     @requires(in_op_thread)
@@ -119,11 +122,14 @@ class Commands(commands.Cog):
     @app_commands.command(name="sendopmessage", description="testing")
     @requires(zeus_only, in_op_thread)
     async def _command_sendopmessage(self, interaction: discord.Interaction):
-        operation = await Operation.fetch_by_thread(interaction.channel_id)
-        await interaction.channel.send(view=DisplayOperation(operation))
-        await interaction.response.send_message(
-            "Operation message resent!", ephemeral=True
-        )
+        try:
+            operation = await Operation.fetch_by_thread(interaction.channel_id)
+            await interaction.channel.send(view=DisplayOperation(operation))
+            await interaction.response.send_message(
+                "Operation message resent!", ephemeral=True
+            )
+        except:
+            print(traceback.format_exc())
 
     @app_commands.command(name="help", description="testing")
     async def _command_help(self, interaction: discord.Interaction):
