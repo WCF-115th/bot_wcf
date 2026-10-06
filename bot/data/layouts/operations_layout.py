@@ -11,9 +11,11 @@ from bot.utils.messageui.layouts import *
 
 
 def _format_discord_date(date_str: str, fmt: str = "d") -> str:
-    dt = datetime.strptime(date_str, "%d/%m/%y")
-    if dt == None:
+    try:
+        dt = datetime.strptime(date_str, "%d/%m/%y")
+    except (ValueError, TypeError):
         return date_str
+
     timestamp = int(dt.timestamp())
     return f"<t:{timestamp}:{fmt}>"
 
