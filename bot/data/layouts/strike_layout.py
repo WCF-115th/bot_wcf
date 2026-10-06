@@ -79,9 +79,13 @@ async def strike_callback(
     player: Player,
     strike_type,
 ):
+    await change_strikes(player, amount, strike_type)
+    updated_player = await Player.fetch(player.guild_id, player.discord_id)
+    await interaction.response.edit_message(view=StrikeLayout(updated_player))
     try:
-        await change_strikes(player, amount, strike_type)
-        updated_player = await Player.fetch(player.guild_id, player.discord_id)
-        await interaction.response.edit_message(view=StrikeLayout(updated_player))
-    except Exception:
-        print(traceback.format_exc())
+        user = interaction.client.get_user(player.discord_id)
+        await user.send("Youve been striked!")
+    except discord.Forbidden:
+        await interaction.user.send(
+            f"{user.mention} couldn't receive the strike notification."
+        )

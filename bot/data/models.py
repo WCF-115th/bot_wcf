@@ -1,6 +1,8 @@
 import json
 from dataclasses import dataclass
 
+from discord import player
+
 OPERATION_MANAGEMENT_ROLES = [
     1473796269800685658,
     1473746808093016125,
