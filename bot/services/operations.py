@@ -8,7 +8,7 @@ from bot.services.sheets import get_valid_sheet_id
 
 
 async def create_operation(
-    name: str, lore: str, arsenal: str, date: str, thread_id: int
+    name: str, lore: str, arsenal: str, date: str, thread_id: int, image_url: str
 ):
     await upsert_row_ai(
         "operations",
@@ -18,6 +18,7 @@ async def create_operation(
         arsenal=arsenal,
         date=date,
         signup_thread_id=thread_id,
+        image_url=image_url,
     )
     id = await last_insert_rowid()
     return id

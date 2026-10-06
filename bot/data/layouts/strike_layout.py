@@ -82,13 +82,14 @@ async def strike_callback(
     await change_strikes(player, amount, strike_type)
     updated_player = await Player.fetch(player.guild_id, player.discord_id)
     await interaction.response.edit_message(view=StrikeLayout(updated_player))
-    try:
-        user = interaction.client.get_user(player.discord_id)
-        await user.send(view=StrikeMessage(player, strike_type))
-    except discord.Forbidden:
-        await interaction.user.send(
-            f"{user.mention} couldn't receive the strike notification."
-        )
+    if amount == 1:
+        try:
+            user = interaction.client.get_user(player.discord_id)
+            await user.send(view=StrikeMessage(player, strike_type))
+        except discord.Forbidden:
+            await interaction.user.send(
+                f"{user.mention} couldn't receive the strike notification."
+            )
 
 
 @layout
@@ -119,8 +120,10 @@ You've received a **behaviour strike**, issued for in-op conduct that goes again
 
 Strikes stay on your record and are only removed after the behaviour is corrected over **3 months**, or at staff discretion.
 
--# 🟨 2+ strikes: locked into Operator until fully active again
--# 🟥 6+ strikes: reverted to Newbie, roles withheld until proven active again
+> You currently have **{total}** strike{"s" if total != 1 else ""}.
+
+-# 🟨 2+ strikes: you are rank locked to newbie
+-# 🟥 3 strikes: banned from the unit
 """),
         ]
 

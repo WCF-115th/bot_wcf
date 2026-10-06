@@ -33,6 +33,7 @@ SCHEMA = {
             "signup_thread_id": "INTEGER",
             "spreadsheet_id": "TEXT",
             "date": "TEXT",
+            "image_url": "TEXT",
             "status": "TEXT DEFAULT 'Pending link'",
             "roles": "TEXT",
         },
@@ -70,6 +71,7 @@ class Operation:
     signup_thread_id: int
     spreadsheet_id: str
     date: str
+    image_url: str
     status: str
     roles: dict
 

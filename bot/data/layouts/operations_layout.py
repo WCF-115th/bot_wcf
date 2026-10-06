@@ -48,6 +48,11 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
         max_length=100,
     )
 
+    image = discord.ui.FileUpload(
+        max_values=1,
+        required=False,
+    )
+
     async def on_submit(self, interaction: discord.Interaction):
         try:
             thread_id = interaction.channel_id
@@ -58,6 +63,7 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
                 self.arsenal.value,
                 discord_date,
                 thread_id,
+                self.image.values[0].url if self.image.values else None,
             )
 
             await interaction.response.send_message(
@@ -149,6 +155,7 @@ def DisplayOperation(operation: Operation):
 
 -# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})
 """),
+        create_image(operation.image_url),
         create_separator(),
         create_text("To sign up do `/signup` and follow the prompts."),
     ]

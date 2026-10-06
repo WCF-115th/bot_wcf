@@ -195,3 +195,14 @@ def create_section(*, text: str = "\u200b", thumbnail_url: str) -> ui.Section:
 def add_items(layout: ui.LayoutView, items: list):
     for item in items:
         layout.add_item(item)
+
+
+def create_image(*images: discord.Attachment | str) -> ui.MediaGallery:
+    gallery = ui.MediaGallery()
+
+    for image in images:
+        url = image.url if isinstance(image, discord.Attachment) else image
+
+        gallery.add_item(ui.MediaGalleryItem(media=discord.UnfurledMediaItem(url=url)))
+
+    return gallery
