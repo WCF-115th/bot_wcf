@@ -45,9 +45,9 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        thread_id = interaction.channel_id
-        discord_date = _format_discord_date(self.date.value)
         try:
+            thread_id = interaction.channel_id
+            discord_date = _format_discord_date(self.date.value)
             id = await create_operation(
                 self.name.value,
                 self.lore.value,

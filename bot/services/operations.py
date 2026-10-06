@@ -2,7 +2,7 @@ import asyncio
 import json
 from concurrent.futures import thread
 
-from bot.services.db.queries_tur import last_insert_rowid, upsert_row
+from bot.services.db.queries_tur import last_insert_rowid, upsert_row, upsert_row_ai
 from bot.services.role_handling import get_role_requirements
 from bot.services.sheets import get_valid_sheet_id
 
@@ -10,7 +10,7 @@ from bot.services.sheets import get_valid_sheet_id
 async def create_operation(
     name: str, lore: str, arsenal: str, date: str, thread_id: int
 ):
-    await upsert_row(
+    await upsert_row_ai(
         "operations",
         "id",
         name=name,
