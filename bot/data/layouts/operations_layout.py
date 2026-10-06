@@ -1,3 +1,4 @@
+import json
 import traceback
 from datetime import datetime
 from functools import partial
@@ -64,16 +65,16 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
     async def on_submit(self, interaction: discord.Interaction):
         try:
             discord_date = _format_discord_date(self.date.value)
+
+            attachments = self.label.component.values
+            image_urls = [a.url for a in attachments] if attachments else []
+
             id = await create_operation(
                 self.name.value,
                 self.lore.value,
                 self.arsenal.value,
                 discord_date,
-                (
-                    self.label.component.values[0].url
-                    if self.label.component.values
-                    else None
-                ),
+                json.dumps(image_urls),
             )
 
             await interaction.response.send_message(
@@ -135,24 +136,27 @@ class SheetLinkModal(discord.ui.Modal, title="Link Sheet"):
         self.operation_id = operation_id
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        ok = await link_operation_sheet(self.operation_id, self.link.value)
-        msg = (
-            "Successfully linked sheet! Operation created!"
-            if ok
-            else "Error, check google sheet link or permissions !"
-        )
-        await interaction.followup.send(msg, ephemeral=True)
-        await interaction.message.delete()
+        try:
+            await interaction.response.defer(ephemeral=True)
+            ok = await link_operation_sheet(self.operation_id, self.link.value)
+            msg = (
+                "Successfully linked sheet! Operation created!"
+                if ok
+                else "Error, check google sheet link or permissions !"
+            )
+            await interaction.followup.send(msg, ephemeral=True)
+            await interaction.message.delete()
 
-        operation = await Operation.fetch(self.operation_id)
-        op_thread = interaction.client.get_channel(OP_THREADS_ID)
-        message, thread = await op_thread.create_thread(
-            name=operation.name, view=DisplayOperation(operation)
-        )
-        await add_operation_thread_id(
-            thread.id, operation.id
-        )  # thread is actually a tuple of message, thread
+            operation = await Operation.fetch(self.operation_id)
+            op_thread = interaction.client.get_channel(OP_THREADS_ID)
+            message, thread = await op_thread.create_thread(
+                name=operation.name, view=DisplayOperation(operation)
+            )
+            await add_operation_thread_id(
+                thread.id, operation.id
+            )  # thread is actually a tuple of message, thread
+        except Exception:
+            print(traceback.format_exc())
 
 
 @layout
@@ -172,8 +176,9 @@ def DisplayOperation(operation: Operation):
 """),
     ]
 
-    if operation.image_url is not None:
-        items.append(create_image(operation.image_url))
+    image_urls = json.loads(operation.image_url) if operation.image_url else []
+    if image_urls:
+        items.append(create_image(*image_urls))
 
     items.extend(
         [
