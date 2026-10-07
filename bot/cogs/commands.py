@@ -159,7 +159,8 @@ class Commands(commands.Cog):
 
     @app_commands.command(name="chud", description="testing")
     async def _command_chud(self, interaction: discord.Interaction):
-        interaction.user.send("https://klipy.com/gifs/sorry-you-are-a-chud")
+        await interaction.response.send_message("You are a chud")
+        await interaction.user.send("https://klipy.com/gifs/sorry-you-are-a-chud")
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):
