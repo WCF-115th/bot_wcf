@@ -157,6 +157,10 @@ class Commands(commands.Cog):
         except Exception:
             print(traceback.format_exc())
 
+    @app_commands.command(name="chud", description="testing")
+    async def _command_chud(self, interaction: discord.Interaction):
+        interaction.user.send("https://klipy.com/gifs/sorry-you-are-a-chud")
+
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):
         await thread.join()
