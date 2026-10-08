@@ -3,7 +3,7 @@ import traceback
 
 import discord
 
-from bot.data.models import CERTIFICATIONS
+from bot.data.models import CERTIFICATIONS, Operation
 from bot.services.db.queries_tur import delete_signup, get_row
 from bot.services.sheets import *
 
@@ -36,16 +36,15 @@ async def get_user_signup_roles(
     return signup["role1"], signup["role2"], signup["role3"]
 
 
-async def drop_signup(operation, discord_id: int, guild_id: int, roster_name: str):
+async def drop_signup(
+    operation: Operation, discord_id: int, guild_id: int, roster_name: str
+):
     """
     Removes a signup from both the DB and the signup sheet.
     """
     await delete_signup(operation.id, discord_id)
-
-    try:
+    if operation.has_orbat:
         await asyncio.to_thread(drop_signup_row, operation.spreadsheet_id, roster_name)
-    except Exception:
-        print(traceback.format_exc())
 
 
 def upsert_signup_row(

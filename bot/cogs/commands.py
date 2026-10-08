@@ -6,15 +6,20 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.data.callbacks.signup_callbacks import drop_out_callback
+from bot.data.callbacks.signup_callbacks import drop_out_callback, signup_callback
 from bot.data.layouts.embedding_layout import CreateChangelogModal
 from bot.data.layouts.help_layout import HelpLayout
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
-from bot.data.layouts.signup_layout import Signup, SignupList, generate_signuplist
+from bot.data.layouts.signup_layout import (
+    SignedUp,
+    Signup,
+    SignupList,
+    generate_signuplist,
+)
 from bot.data.layouts.strike_layout import StrikeLayout
 from bot.data.models import Operation, Player
 from bot.services import operations
-from bot.services.db.queries_tur import get_row
+from bot.services.db.queries_tur import upsert_row_ai
 from bot.services.operations import upsert_row
 from bot.services.permissions import *
 from bot.services.role_handling import (
@@ -50,32 +55,33 @@ class Commands(commands.Cog):
                     "No operation found in this channel.", ephemeral=True
                 )
                 return
-
-            role1, role2, role3 = await get_user_signup_roles(
-                operation.id, interaction.user.id
-            )
             roster_name = await get_roster_name(
                 interaction.guild_id, interaction.user.id, interaction.user.name
             )
-            available_role = available_roles(interaction.user, operation.roles)
-
-            await interaction.response.send_message(
-                view=Signup(
-                    interaction.user,
-                    operation,
-                    available_role=available_role,
-                    role1=role1,
-                    role2=role2,
-                    role3=role3,
-                    roster_name=roster_name,
-                ),
-                ephemeral=True,
-            )
-        except Exception:
+            if operation.has_orbat:
+                role1, role2, role3 = await get_user_signup_roles(
+                    operation.id, interaction.user.id
+                )
+                available_role = available_roles(interaction.user, operation.roles)
+                await interaction.response.send_message(
+                    view=Signup(
+                        interaction.user,
+                        operation,
+                        available_role=available_role,
+                        role1=role1,
+                        role2=role2,
+                        role3=role3,
+                        roster_name=roster_name,
+                    ),
+                    ephemeral=True,
+                )
+            else:
+                await signup_callback(interaction)
+        except:
             print(traceback.format_exc())
 
     @app_commands.command(name="updateroles", description="testing")
-    @requires(zeus_only, in_op_thread)
+    @requires(zeus_only, not_orbatless_op, in_op_thread)
     async def _command_updateroles(self, interaction: discord.Interaction):
         try:
             operation = await Operation.fetch_by_thread(interaction.channel_id)
@@ -157,11 +163,6 @@ class Commands(commands.Cog):
             )
         except Exception:
             print(traceback.format_exc())
-
-    @app_commands.command(name="chud", description="testing")
-    async def _command_chud(self, interaction: discord.Interaction):
-        await interaction.response.send_message("You are a chud")
-        await interaction.user.send("https://klipy.com/gifs/sorry-you-are-a-chud")
 
     @app_commands.command(name="chud", description="testing")
     async def _command_chud(

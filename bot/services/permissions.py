@@ -44,3 +44,15 @@ async def not_in_op_thread(interaction: discord.Interaction):
     if operation is not None:
         return False, "There is already an existing operation in this channel."
     return True, None
+
+
+async def not_orbatless_op(interaction: discord.Interaction):
+    operation = await Operation.fetch_by_thread(interaction.channel_id)
+
+    if not operation.has_orbat:
+        return (
+            False,
+            "You can't use this command because this is an orbatless operation",
+        )
+
+    return True, None

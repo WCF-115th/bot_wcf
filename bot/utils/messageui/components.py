@@ -22,7 +22,7 @@ def create_text(content: str) -> ui.TextDisplay:
 def create_separator(
     *,
     spacing: discord.SeparatorSpacing = discord.SeparatorSpacing.small,
-    visible: bool = True
+    visible: bool = True,
 ) -> ui.Separator:
     return ui.Separator(spacing=spacing, visible=visible)
 
@@ -140,28 +140,36 @@ def create_button(
     callback=None,
     function: str = None,
     delete_origin: bool = False,
-    returnmsg: bool = True
-):
+    returnmsg: bool = True,
+    wrap: bool = True,
+) -> ui.Button | ui.ActionRow:
     """
     Creates a button for BaseLayout type objects.
 
     Args:
         label: text shown on the button
-        custom_id: custom_id for this button, used to identify it in interactions
+        custom_id: custom_id for this button
         emoji: optional emoji shown on the button
         style: discord.ButtonStyle (default: success)
-        callback: optional async function(interaction, answers, function=...) run on click
-        function: optional function that will be called inside the callback
+        callback: optional async function(interaction, answers, ...)
+        function: optional function called inside the callback
         delete_origin: if True, deletes the original message before sending the result
+        returnmsg: whether the callback should return a message
+        wrap: if True, return the button inside an ActionRow.
+              If False, return the raw Button.
     """
-    btn = ui.Button(style=style, label=label, emoji=emoji, custom_id=custom_id)
 
-    # callback handling
+    btn = ui.Button(
+        style=style,
+        label=label,
+        emoji=emoji,
+        custom_id=custom_id,
+    )
+
     async def _cb(interaction: discord.Interaction):
-        view = btn.view  # BaseLayout object
+        view = btn.view
 
         if callback:
-
             if function:
                 await callback(
                     interaction,
@@ -173,16 +181,17 @@ def create_button(
                 )
             else:
                 await callback(interaction, view.answers)
-
         else:
             await interaction.response.defer()
 
     btn.callback = _cb
 
-    # button creation
-    row = ui.ActionRow()
-    row.add_item(btn)
-    return row
+    if wrap:
+        row = ui.ActionRow()
+        row.add_item(btn)
+        return row
+
+    return btn
 
 
 def create_section(*, text: str = "\u200b", thumbnail_url: str) -> ui.Section:
@@ -206,3 +215,12 @@ def create_image(*images: discord.Attachment | str) -> ui.MediaGallery:
         gallery.add_item(media=discord.UnfurledMediaItem(url=url))
 
     return gallery
+
+
+def create_button_row(*buttons: discord.ui.Button) -> discord.ui.ActionRow:
+    row = discord.ui.ActionRow()
+
+    for button in buttons:
+        row.add_item(button)
+
+    return row

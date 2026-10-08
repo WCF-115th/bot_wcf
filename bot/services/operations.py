@@ -55,6 +55,14 @@ async def link_operation_sheet(operation_id: int, link: str) -> bool:
     return True
 
 
+async def make_operation_orbatless(operation_id: int):
+    try:
+        await upsert_row_ai("operations", "id", id=operation_id, has_orbat=False)
+    except Exception:
+        print(traceback.format_exc())
+    return
+
+
 async def generate_op_names():
     operations = await get_rows("operations", order_by="id DESC", limit=25)
     return operations

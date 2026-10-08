@@ -11,6 +11,7 @@ from bot.services.operations import (
     add_operation_thread_id,
     create_operation,
     link_operation_sheet,
+    make_operation_orbatless,
 )
 from bot.services.sheets import spreadsheet_url
 from bot.utils.messageui.layouts import *
@@ -111,14 +112,50 @@ def SheetLinking(operation_id: int):
             callback=partial(confirm_callback, operation_id=operation_id),
         )
     ]
+    extra = [
+        create_button_row(
+            create_button(
+                label="I've shared it",
+                style=discord.ButtonStyle.green,
+                callback=partial(confirm_callback, operation_id=operation_id),
+                wrap=False,
+            ),
+            create_button(
+                label="Don't use an orbat",
+                style=discord.ButtonStyle.danger,
+                callback=partial(
+                    confirm_callback, operation_id=operation_id, orbat=False
+                ),
+                wrap=False,
+            ),
+        )
+    ]
 
     return {"items": items, "extra": extra}
 
 
 async def confirm_callback(
-    interaction: discord.Interaction, _answers, operation_id: int
+    interaction: discord.Interaction, _answers, operation_id: int, orbat: bool = True
 ):
-    await interaction.response.send_modal(SheetLinkModal(operation_id=operation_id))
+    await interaction.response.defer(ephemeral=True)
+    if not orbat:
+        try:
+
+            await interaction.message.delete()
+            await make_operation_orbatless(operation_id)
+
+            operation = await Operation.fetch(operation_id)
+            # creating op post
+            op_thread = interaction.client.get_channel(OP_THREADS_ID)
+            message, thread = await op_thread.create_thread(
+                name=operation.name, view=DisplayOperation(operation)
+            )
+            await add_operation_thread_id(thread.id, operation.id)
+        except:
+            print(traceback.format_exc())
+    else:
+        await interaction.response.send_modal(SheetLinkModal(operation_id=operation_id))
+    await interaction.followup.send("Operation created!", ephemeral=True)
 
 
 OP_THREADS_ID = 1474849828143104193
@@ -171,11 +208,16 @@ def DisplayOperation(operation: Operation):
 
 **Loadout**
 > {operation.arsenal}
-
--# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})
 """),
     ]
-
+    # adding orbat link
+    if operation.has_orbat:
+        items.append(
+            create_text(
+                f"\n-# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})"
+            )
+        )
+    # adding image
     image_urls = json.loads(operation.image_url) if operation.image_url else []
     if image_urls:
         items.append(create_image(*image_urls))

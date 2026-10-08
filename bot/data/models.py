@@ -35,6 +35,7 @@ SCHEMA = {
             "image_url": "TEXT",
             "status": "TEXT DEFAULT 'Pending link'",
             "roles": "TEXT",
+            "has_orbat": "BOOLEAN DEFAULT TRUE",
         },
     },
     "signups": {
@@ -73,6 +74,7 @@ class Operation:
     image_url: str
     status: str
     roles: dict
+    has_orbat: bool
 
     def __post_init__(self):
         if isinstance(self.roles, str):
