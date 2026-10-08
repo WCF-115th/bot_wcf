@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.data.callbacks.signup_callbacks import drop_out_callback
+from bot.data.layouts.embedding_layout import CreateChangelogModal
 from bot.data.layouts.help_layout import HelpLayout
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
 from bot.data.layouts.signup_layout import Signup, SignupList, generate_signuplist
@@ -169,6 +170,14 @@ class Commands(commands.Cog):
         member = member or interaction.user
         await interaction.response.send_message(f"{member.mention} is a chud")
         await member.send("https://klipy.com/gifs/sorry-you-are-a-chud")
+
+    @app_commands.command(name="changelog", description="testing")
+    @requires(zeus_only)
+    async def _command_changelog(self, interaction: discord.Interaction):
+        try:
+            await interaction.response.send_modal(CreateChangelogModal())
+        except Exception:
+            print(traceback.format_exc())
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):

@@ -3,7 +3,12 @@ import json
 import traceback
 from concurrent.futures import thread
 
-from bot.services.db.queries_tur import last_insert_rowid, upsert_row, upsert_row_ai
+from bot.services.db.queries_tur import (
+    last_insert_rowid,
+    upsert_row,
+    upsert_row_ai,
+    get_rows,
+)
 from bot.services.role_handling import get_role_requirements
 from bot.services.sheets import get_valid_sheet_id
 
@@ -48,3 +53,8 @@ async def link_operation_sheet(operation_id: int, link: str) -> bool:
         status="Sheet Linked",
     )
     return True
+
+
+async def generate_op_names():
+    operations = await get_rows("operations", order_by="id DESC", limit=25)
+    return operations
