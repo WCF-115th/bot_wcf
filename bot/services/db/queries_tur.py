@@ -1,7 +1,5 @@
 from typing import Any, Optional
 
-import libsql_client
-
 from bot.data.models import SCHEMA
 from bot.services.db.connections_tur import get_connection
 
@@ -175,3 +173,9 @@ async def delete_signup(operation_id: int, discord_id: int):
         "DELETE FROM signups WHERE operation_id = ? AND discord_id = ?",
         [operation_id, discord_id],
     )
+
+
+async def delete_operation(operation_id: int):
+    client = get_connection()
+    await client.execute("DELETE FROM signups WHERE operation_id = ?", [operation_id])
+    await client.execute("DELETE FROM operations WHERE id = ?", [operation_id])

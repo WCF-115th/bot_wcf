@@ -19,8 +19,8 @@ from bot.data.layouts.signup_layout import (
 from bot.data.layouts.strike_layout import StrikeLayout
 from bot.data.models import Operation, Player
 from bot.services import operations
-from bot.services.db.queries_tur import upsert_row_ai
-from bot.services.operations import upsert_row
+from bot.services.db.queries_tur import delete_operation, upsert_row_ai
+from bot.services.operations import op_autocomplete, upsert_row
 from bot.services.permissions import *
 from bot.services.role_handling import (
     available_roles,
@@ -179,6 +179,28 @@ class Commands(commands.Cog):
             await interaction.response.send_modal(CreateChangelogModal())
         except Exception:
             print(traceback.format_exc())
+
+    @app_commands.command(name="deleteop", description="Delete an operation")
+    @app_commands.autocomplete(op=op_autocomplete)
+    @requires(zeus_only)
+    async def _command_deleteop(self, interaction: discord.Interaction, op: str):
+        if not op.isdigit():
+            await interaction.response.send_message(
+                "Pick an operation from the list.", ephemeral=True
+            )
+            return
+
+        operation = await Operation.fetch(int(op))
+        if operation is None:
+            await interaction.response.send_message(
+                "Operation not found.", ephemeral=True
+            )
+            return
+
+        await delete_operation(operation.id)
+        await interaction.response.send_message(
+            f"Deleted **{operation.name}**.", ephemeral=True
+        )
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):

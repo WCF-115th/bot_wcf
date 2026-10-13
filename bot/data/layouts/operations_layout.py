@@ -135,27 +135,46 @@ def SheetLinking(operation_id: int):
 
 
 async def confirm_callback(
-    interaction: discord.Interaction, _answers, operation_id: int, orbat: bool = True
+    interaction: discord.Interaction,
+    _answers,
+    operation_id: int,
+    orbat: bool = True,
 ):
-    await interaction.response.defer(ephemeral=True)
-    if not orbat:
-        try:
-
-            await interaction.message.delete()
-            await make_operation_orbatless(operation_id)
-
-            operation = await Operation.fetch(operation_id)
-            # creating op post
-            op_thread = interaction.client.get_channel(OP_THREADS_ID)
-            message, thread = await op_thread.create_thread(
-                name=operation.name, view=DisplayOperation(operation)
-            )
-            await add_operation_thread_id(thread.id, operation.id)
-        except:
-            print(traceback.format_exc())
-    else:
+    if orbat:
         await interaction.response.send_modal(SheetLinkModal(operation_id=operation_id))
-    await interaction.followup.send("Operation created!", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    try:
+        await interaction.message.delete()
+        await make_operation_orbatless(operation_id)
+
+        operation = await Operation.fetch(operation_id)
+
+        op_thread = interaction.client.get_channel(OP_THREADS_ID)
+        if op_thread is None:
+            raise RuntimeError("Operation threads channel was not found")
+
+        message, thread = await op_thread.create_thread(
+            name=operation.name,
+            view=DisplayOperation(operation),
+        )
+
+        await add_operation_thread_id(thread.id, operation.id)
+
+    except Exception:
+        print(traceback.format_exc())
+        await interaction.followup.send(
+            "Failed to create the operation. Please check the logs.",
+            ephemeral=True,
+        )
+        return
+
+    await interaction.followup.send(
+        "Operation created!",
+        ephemeral=True,
+    )
 
 
 OP_THREADS_ID = 1474849828143104193

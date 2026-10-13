@@ -3,11 +3,14 @@ import json
 import traceback
 from concurrent.futures import thread
 
+import discord
+from discord import app_commands
+
 from bot.services.db.queries_tur import (
+    get_rows,
     last_insert_rowid,
     upsert_row,
     upsert_row_ai,
-    get_rows,
 )
 from bot.services.role_handling import get_role_requirements
 from bot.services.sheets import get_valid_sheet_id
@@ -66,3 +69,14 @@ async def make_operation_orbatless(operation_id: int):
 async def generate_op_names():
     operations = await get_rows("operations", order_by="id DESC", limit=25)
     return operations
+
+
+async def op_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    ops = await get_rows("operations", order_by="id DESC")
+    return [
+        app_commands.Choice(name=op["name"][:100], value=str(op["id"]))
+        for op in ops
+        if current.lower() in op["name"].lower()
+    ][:25]
