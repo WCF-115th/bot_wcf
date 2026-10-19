@@ -92,7 +92,7 @@ def SheetLinking(operation_id: int):
         create_text("""
 # 📋 Link your Attendance & ORBAT sheet
 
-1. Open the template and click **Make a copy**
+1. [Open the template](https://docs.google.com/spreadsheets/d/1Esp4debnAbhl5zJOQpVIu4gtmMDHvHhy3LyVJ8c6aGM/copy) and click **Make a copy**
 2. Rename the copy with your op's name
 3. Click **Share** (top right)
 4. Paste this email and give it **Editor** access:
@@ -100,8 +100,6 @@ def SheetLinking(operation_id: int):
 5. Click **Send** (no need to notify)
 6. Copy your sheet's link
 7. Come back here and click **I've shared it**
-
--# [Open the template](https://docs.google.com/spreadsheets/d/1Esp4debnAbhl5zJOQpVIu4gtmMDHvHhy3LyVJ8c6aGM/copy)
 """),
     ]
 
@@ -244,7 +242,9 @@ def DisplayOperation(operation: Operation):
     items.extend(
         [
             create_separator(),
-            create_text("To sign up do `/signup` and follow the prompts."),
+            create_text(
+                "To sign up do `/signup` and follow the prompts. <@&1473741029638410313>"
+            ),
         ]
     )
 

@@ -18,9 +18,7 @@ async def get_row(table: str, where: dict[str, Any]) -> Optional[dict[str, Any]]
     """
     client = get_connection()
     where_clause = " AND ".join(f"{col} = ?" for col in where)
-    result = await client.execute(
-        f"SELECT * FROM {table} WHERE {where_clause}", list(where.values())
-    )
+    result = await client.execute(f"SELECT * FROM {table} WHERE {where_clause}", list(where.values()))
     if not result.rows:
         return None
     return dict(zip(result.columns, result.rows[0]))
@@ -84,9 +82,7 @@ async def upsert_row(
     cols = list(values.keys())
     placeholders = ", ".join("?" for _ in cols)
     col_names = ", ".join(cols)
-    update_clause = ", ".join(
-        f"{col} = excluded.{col}" for col in cols if col != conflict_col
-    )
+    update_clause = ", ".join(f"{col} = excluded.{col}" for col in cols if col != conflict_col)
 
     sql = f"""
             INSERT INTO {table} ({col_names}) VALUES ({placeholders})
@@ -144,9 +140,7 @@ async def upsert_row_ai(
     return None
 
 
-async def increment_column(
-    table: str, where_col: str, where_val: Any, column: str, amount: int
-) -> None:
+async def increment_column(table: str, where_col: str, where_val: Any, column: str, amount: int) -> None:
     """
     Increments (or decrements, with a negative amount) a single numeric
     column on an existing row, without touching any other column.
@@ -179,3 +173,20 @@ async def delete_operation(operation_id: int):
     client = get_connection()
     await client.execute("DELETE FROM signups WHERE operation_id = ?", [operation_id])
     await client.execute("DELETE FROM operations WHERE id = ?", [operation_id])
+
+
+async def get_player_signups(discord_id: int) -> list[dict]:
+    client = get_connection()
+    rows = await client.execute(
+        """
+        SELECT o.id, o.name, o.date, o.status, o.signup_thread_id,
+               s.role1, s.role2, s.role3
+        FROM signups s
+        JOIN operations o ON o.id = s.operation_id
+        WHERE s.discord_id = ?
+        ORDER BY o.date
+        """,
+        (discord_id,),
+    )
+    cols = ("id", "name", "date", "status", "thread_id", "role1", "role2", "role3")
+    return [dict(zip(cols, r)) for r in rows]
