@@ -28,7 +28,7 @@ class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="create-op", description="testing")
+    @app_commands.command(name="create-op", description="(Zeus) Create a new operation")
     @requires(zeus_only, not_in_op_thread)
     async def _command_create_op(self, interaction: discord.Interaction):
         try:
@@ -36,7 +36,7 @@ class Commands(commands.Cog):
         except:
             print(traceback.format_exc())
 
-    @app_commands.command(name="signup", description="testing")
+    @app_commands.command(name="signup", description="Sign up for the operation in this thread")
     @requires(in_op_thread)
     async def _command_signup(self, interaction: discord.Interaction):
         try:
@@ -65,42 +65,37 @@ class Commands(commands.Cog):
         except:
             print(traceback.format_exc())
 
-    try:
+    @app_commands.command(name="updateroles", description="(Zeus) Re-sync available roles from the op's Roles sheet")
+    @requires(zeus_only, in_op_thread, not_orbatless_op)
+    async def _command_updateroles(self, interaction: discord.Interaction):
+        try:
+            operation = await Operation.fetch_by_thread(interaction.channel_id)
 
-        @app_commands.command(name="updateroles", description="testing")
-        @requires(zeus_only, in_op_thread, not_orbatless_op)
-        async def _command_updateroles(self, interaction: discord.Interaction):
-            try:
-                operation = await Operation.fetch_by_thread(interaction.channel_id)
+            if operation is None:
+                await interaction.response.send_message("No operation found in this channel.", ephemeral=True)
+                return
 
-                if operation is None:
-                    await interaction.response.send_message("No operation found in this channel.", ephemeral=True)
-                    return
+            role_list = await asyncio.to_thread(get_role_requirements, operation.spreadsheet_id, "Roles!A2:O33")
 
-                role_list = await asyncio.to_thread(get_role_requirements, operation.spreadsheet_id, "Roles!A2:O33")
+            await upsert_row(
+                "operations",
+                "id",
+                id=operation.id,
+                roles=json.dumps(role_list),
+            )
 
-                await upsert_row(
-                    "operations",
-                    "id",
-                    id=operation.id,
-                    roles=json.dumps(role_list),
-                )
+            await interaction.response.send_message("Role list updated.", ephemeral=True)
+        except Exception:
+            print(traceback.format_exc())
 
-                await interaction.response.send_message("Role list updated.", ephemeral=True)
-            except Exception:
-                print(traceback.format_exc())
-
-    except:
-        print(traceback.format_exc())
-
-    @app_commands.command(name="syncroster", description="testing")
+    @app_commands.command(name="syncroster", description="(Zeus) Sync the server roster from a roster sheet link")
     @requires(zeus_only)
     async def _command_syncroster(self, interaction: discord.Interaction, roster_link: str):
         await interaction.response.defer(ephemeral=True)
         count = await sync_roster(roster_link, interaction.guild_id)
         await interaction.followup.send(f"Roster synced ({count} entries).")
 
-    @app_commands.command(name="dropout", description="testing")
+    @app_commands.command(name="dropout", description="Drop out of the operation in this thread")
     @requires(in_op_thread)
     async def _command_dropout(self, interaction: discord.Interaction):
         try:
@@ -108,7 +103,7 @@ class Commands(commands.Cog):
         except:
             print(traceback.format_exc())
 
-    @app_commands.command(name="sendopmessage", description="testing")
+    @app_commands.command(name="sendopmessage", description="(Zeus) Re-post this operation's info message")
     @requires(zeus_only, in_op_thread)
     async def _command_sendopmessage(self, interaction: discord.Interaction):
         try:
@@ -118,18 +113,18 @@ class Commands(commands.Cog):
         except:
             print(traceback.format_exc())
 
-    @app_commands.command(name="help", description="testing")
+    @app_commands.command(name="help", description="Show how the bot works")
     async def _command_help(self, interaction: discord.Interaction):
         await interaction.response.send_message(view=HelpLayout(interaction), ephemeral=True)
 
-    @app_commands.command(name="listslots", description="testing")
+    @app_commands.command(name="listslots", description="(Zeus) List everyone signed up for this operation")
     @requires(zeus_only, in_op_thread)
     async def _command_listslots(self, interaction: discord.Interaction):
         operation = await Operation.fetch_by_thread(interaction.channel_id)
         signup_list = await generate_signuplist(operation)
         await interaction.response.send_message(view=SignupList(operation, signup_list))
 
-    @app_commands.command(name="strike", description="Give a player a strike")
+    @app_commands.command(name="strike", description="(Zeus) Add or remove strikes for a player")
     @requires(zeus_only)
     async def _command_strike(self, interaction: discord.Interaction, member: discord.Member):
         try:
@@ -138,13 +133,13 @@ class Commands(commands.Cog):
         except Exception:
             print(traceback.format_exc())
 
-    @app_commands.command(name="chud", description="testing")
+    @app_commands.command(name="chud", description="Call someone a chud")
     async def _command_chud(self, interaction: discord.Interaction, member: discord.Member | None = None):
         member = member or interaction.user
         await interaction.response.send_message(f"{member.mention} is a chud")
         await member.send("https://klipy.com/gifs/sorry-you-are-a-chud")
 
-    @app_commands.command(name="changelog", description="testing")
+    @app_commands.command(name="changelog", description="(Zeus) Post a changelog announcement")
     @requires(zeus_only)
     async def _command_changelog(self, interaction: discord.Interaction):
         try:
@@ -152,7 +147,7 @@ class Commands(commands.Cog):
         except Exception:
             print(traceback.format_exc())
 
-    @app_commands.command(name="deleteop", description="Delete an operation")
+    @app_commands.command(name="deleteop", description="(Zeus) Delete an operation and its signups")
     @app_commands.autocomplete(op=op_autocomplete)
     @requires(zeus_only)
     async def _command_deleteop(self, interaction: discord.Interaction, op: str):
@@ -168,7 +163,7 @@ class Commands(commands.Cog):
         await delete_operation(operation.id)
         await interaction.response.send_message(f"Deleted **{operation.name}**.", ephemeral=True)
 
-    @app_commands.command(name="info", description="Gives a users info")
+    @app_commands.command(name="info", description="Show a player's roster profile and signups")
     async def _command_info(self, interaction: discord.Interaction, member: discord.Member | None = None):
         try:
             member = member or interaction.user
