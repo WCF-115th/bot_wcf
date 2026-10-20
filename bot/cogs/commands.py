@@ -65,28 +65,33 @@ class Commands(commands.Cog):
         except:
             print(traceback.format_exc())
 
-    @app_commands.command(name="updateroles", description="testing")
-    @requires(zeus_only, not_orbatless_op, in_op_thread)
-    async def _command_updateroles(self, interaction: discord.Interaction):
-        try:
-            operation = await Operation.fetch_by_thread(interaction.channel_id)
+    try:
 
-            if operation is None:
-                await interaction.response.send_message("No operation found in this channel.", ephemeral=True)
-                return
+        @app_commands.command(name="updateroles", description="testing")
+        @requires(zeus_only, in_op_thread, not_orbatless_op)
+        async def _command_updateroles(self, interaction: discord.Interaction):
+            try:
+                operation = await Operation.fetch_by_thread(interaction.channel_id)
 
-            role_list = await asyncio.to_thread(get_role_requirements, operation.spreadsheet_id, "Roles!A2:O33")
+                if operation is None:
+                    await interaction.response.send_message("No operation found in this channel.", ephemeral=True)
+                    return
 
-            await upsert_row(
-                "operations",
-                "id",
-                id=operation.id,
-                roles=json.dumps(role_list),
-            )
+                role_list = await asyncio.to_thread(get_role_requirements, operation.spreadsheet_id, "Roles!A2:O33")
 
-            await interaction.response.send_message("Role list updated.", ephemeral=True)
-        except Exception:
-            print(traceback.format_exc())
+                await upsert_row(
+                    "operations",
+                    "id",
+                    id=operation.id,
+                    roles=json.dumps(role_list),
+                )
+
+                await interaction.response.send_message("Role list updated.", ephemeral=True)
+            except Exception:
+                print(traceback.format_exc())
+
+    except:
+        print(traceback.format_exc())
 
     @app_commands.command(name="syncroster", description="testing")
     @requires(zeus_only)
