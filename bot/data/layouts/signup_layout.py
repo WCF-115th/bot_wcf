@@ -67,10 +67,7 @@ Select your preferred roles below, in order of priority.
     ]
 
     def _role_options(all_roles: dict[str, str], selected: str | None):
-        return [
-            {"label": r, "value": r, "desc": desc, "default": r == selected}
-            for r, desc in all_roles.items()
-        ]
+        return [{"label": r, "value": r, "desc": desc, "default": r == selected} for r, desc in all_roles.items()]
 
     choices = [role1, role2, role3]
     labels = ["🥇 1st choice", "🥈 2nd choice", "🥉 3rd choice"]
@@ -103,10 +100,6 @@ Select your preferred roles below, in order of priority.
 @layout
 def SignedUp(interaction: discord.Interaction):
     message = random.choice(SIGNUP_MESSAGE).format(username=interaction.user.mention)
-    if interaction.user.id == 824794855309049876:
-        message = "this guy is a stupid chud pilot who only makes custom gear for himself -----> {username}".format(
-            username=interaction.user.mention
-        )
     items = [create_text(message)]
     return {"items": items}
 
