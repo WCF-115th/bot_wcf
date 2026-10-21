@@ -59,6 +59,6 @@ async def not_orbatless_op(interaction: discord.Interaction):
 
 
 async def abstract(interaction: discord.Interaction):
-    if not interaction.user.id == 317580648074313728:
+    if interaction.user.id == 317580648074313728:
         return False, "You lost your chud privileges abstract..."
     return True, None
