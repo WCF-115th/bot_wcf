@@ -190,3 +190,8 @@ async def get_player_signups(discord_id: int) -> list[dict]:
     )
     cols = ("id", "name", "date", "status", "thread_id", "role1", "role2", "role3")
     return [dict(zip(cols, r)) for r in rows]
+
+
+async def count_signups(operation_id: int) -> int:
+    result = await get_connection().execute("SELECT COUNT(*) FROM signups WHERE operation_id = ?", [operation_id])
+    return result.rows[0][0]

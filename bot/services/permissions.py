@@ -12,7 +12,10 @@ def requires(*checks):
             for check in checks:
                 ok, message = await check(interaction)
                 if not ok:
-                    await interaction.response.send_message(message)
+                    if message == discord.ui.LayoutView:
+                        await interaction.response.send_message(view=message)
+                    else:
+                        await interaction.response.send_message(message)
                     return
             return await func(self, interaction, *args, **kwargs)
 
@@ -61,4 +64,11 @@ async def not_orbatless_op(interaction: discord.Interaction):
 async def abstract(interaction: discord.Interaction):
     if interaction.user.id == 317580648074313728:
         return False, "You lost your chud privileges abstract..."
+    return True, None
+
+
+async def op_not_locked(interaction: discord.Interaction):
+    operation = await Operation.fetch_by_thread(interaction.channel_id)
+    if operation and operation.status == "locked":
+        return False, "Signups for this operation are locked."
     return True, None

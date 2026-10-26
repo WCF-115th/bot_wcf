@@ -6,19 +6,12 @@ from concurrent.futures import thread
 import discord
 from discord import app_commands
 
-from bot.services.db.queries_tur import (
-    get_rows,
-    last_insert_rowid,
-    upsert_row,
-    upsert_row_ai,
-)
+from bot.services.db.queries_tur import get_rows, last_insert_rowid, upsert_row, upsert_row_ai
 from bot.services.role_handling import get_role_requirements
 from bot.services.sheets import get_valid_sheet_id
 
 
-async def create_operation(
-    name: str, lore: str, arsenal: str, date: str, image_url: str
-):
+async def create_operation(name: str, lore: str, arsenal: str, date: str, image_url: str, discord_id: int):
     await upsert_row_ai(
         "operations",
         "id",
@@ -27,6 +20,7 @@ async def create_operation(
         arsenal=arsenal,
         date=date,
         image_url=image_url,
+        owner=discord_id,
     )
     id = await last_insert_rowid()
     return id
@@ -34,9 +28,7 @@ async def create_operation(
 
 async def add_operation_thread_id(thread_id: str, operation_id):
     try:
-        await upsert_row_ai(
-            "operations", "id", id=operation_id, signup_thread_id=thread_id
-        )
+        await upsert_row_ai("operations", "id", id=operation_id, signup_thread_id=thread_id)
     except Exception:
         print(traceback.format_exc())
     return
@@ -71,12 +63,15 @@ async def generate_op_names():
     return operations
 
 
-async def op_autocomplete(
-    interaction: discord.Interaction, current: str
-) -> list[app_commands.Choice[str]]:
+async def op_autocomplete(interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
     ops = await get_rows("operations", order_by="id DESC")
-    return [
-        app_commands.Choice(name=op["name"][:100], value=str(op["id"]))
-        for op in ops
-        if current.lower() in op["name"].lower()
-    ][:25]
+    return [app_commands.Choice(name=op["name"][:100], value=str(op["id"])) for op in ops if current.lower() in op["name"].lower()][:25]
+
+
+async def lock_operation(operation_id: int):
+    await upsert_row_ai("operations", "id", id=operation_id, status="locked")
+    return
+
+
+async def update_operation(operation_id: int, **fields):
+    await upsert_row_ai("operations", "id", id=operation_id, **fields)

@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.data.callbacks.signup_callbacks import drop_out_callback, signup_callback
+from bot.data.layouts.edit_op_layout import EditOperation
 from bot.data.layouts.embedding_layout import CreateChangelogModal
 from bot.data.layouts.help_layout import HelpLayout
 from bot.data.layouts.operations_layout import CreateOperationModal, DisplayOperation
@@ -15,7 +16,7 @@ from bot.data.layouts.signup_layout import SignedUp, Signup, SignupList, generat
 from bot.data.layouts.strike_layout import StrikeLayout
 from bot.data.models import Operation, Player
 from bot.services import operations
-from bot.services.db.queries_tur import delete_operation, get_player_signups, upsert_row_ai
+from bot.services.db.queries_tur import count_signups, delete_operation, get_player_signups, upsert_row_ai
 from bot.services.operations import op_autocomplete, upsert_row
 from bot.services.permissions import *
 from bot.services.role_handling import available_roles, extract_roles, get_role_requirements, parse_role_requirements
@@ -37,7 +38,7 @@ class Commands(commands.Cog):
             print(traceback.format_exc())
 
     @app_commands.command(name="signup", description="Sign up for the operation in this thread")
-    @requires(in_op_thread)
+    @requires(in_op_thread, op_not_locked)
     async def _command_signup(self, interaction: discord.Interaction):
         try:
             operation = await Operation.fetch_by_thread(interaction.channel_id)
@@ -176,6 +177,13 @@ class Commands(commands.Cog):
             await interaction.response.send_message(view=profile_layout(player, member, signups), ephemeral=True)
         except:
             print(traceback.format_exc())
+
+    @app_commands.command(name="editop", description="(Zeus) Edit or lock the operation in this thread")
+    @requires(zeus_only, in_op_thread)
+    async def _command_editop(self, interaction: discord.Interaction):
+        operation = await Operation.fetch_by_thread(interaction.channel_id)
+        count = await count_signups(operation.id)
+        await interaction.response.send_message(view=EditOperation(operation, count), ephemeral=True)
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):

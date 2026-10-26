@@ -6,13 +6,10 @@ from functools import partial
 import discord
 from discord import components
 
+from bot.data.layouts.edit_op_layout import EditOperation, update_op_post
 from bot.data.models import Operation
-from bot.services.operations import (
-    add_operation_thread_id,
-    create_operation,
-    link_operation_sheet,
-    make_operation_orbatless,
-)
+from bot.services.db.queries_tur import count_signups
+from bot.services.operations import add_operation_thread_id, create_operation, link_operation_sheet, make_operation_orbatless
 from bot.services.sheets import spreadsheet_url
 from bot.utils.messageui.layouts import *
 
@@ -76,6 +73,7 @@ class CreateOperationModal(discord.ui.Modal, title="Create Operation"):
                 self.arsenal.value,
                 discord_date,
                 json.dumps(image_urls),
+                interaction.user.id,
             )
 
             await interaction.response.send_message(
@@ -121,9 +119,7 @@ def SheetLinking(operation_id: int):
             create_button(
                 label="Don't use an orbat",
                 style=discord.ButtonStyle.danger,
-                callback=partial(
-                    confirm_callback, operation_id=operation_id, orbat=False
-                ),
+                callback=partial(confirm_callback, operation_id=operation_id, orbat=False),
                 wrap=False,
             ),
         )
@@ -192,34 +188,40 @@ class SheetLinkModal(discord.ui.Modal, title="Link Sheet"):
     async def on_submit(self, interaction: discord.Interaction):
         try:
             await interaction.response.defer(ephemeral=True)
+
             ok = await link_operation_sheet(self.operation_id, self.link.value)
-            msg = (
-                "Successfully linked sheet! Operation created!"
-                if ok
-                else "Error, check google sheet link or permissions !"
-            )
-            await interaction.followup.send(msg, ephemeral=True)
-            await interaction.message.delete()
+            if not ok:
+                await interaction.followup.send("Error, check google sheet link or permissions !", ephemeral=True)
+                return
 
             operation = await Operation.fetch(self.operation_id)
-            op_thread = interaction.client.get_channel(OP_THREADS_ID)
-            message, thread = await op_thread.create_thread(
-                name=operation.name, view=DisplayOperation(operation)
-            )
-            await add_operation_thread_id(
-                thread.id, operation.id
-            )  # thread is actually a tuple of message, thread
+
+            if operation.signup_thread_id:  # already posted, so this is a re-link
+                await update_op_post(interaction.client, operation)
+                await interaction.edit_original_response(view=EditOperation(operation, await count_signups(operation.id)))
+                await interaction.followup.send("Sheet re-linked!", ephemeral=True)
+                return
+
+            # first link: create the op post
+            await interaction.delete_original_response()
+            op_forum = interaction.client.get_channel(OP_THREADS_ID)
+            thread, _ = await op_forum.create_thread(name=operation.name, view=DisplayOperation(operation))
+            await add_operation_thread_id(thread.id, operation.id)
+            await interaction.followup.send("Successfully linked sheet! Operation created!", ephemeral=True)
         except Exception:
             print(traceback.format_exc())
 
 
 @layout
 def DisplayOperation(operation: Operation):
+    locked = operation.status == "locked"
     items = [
         create_text(f"""
 # 🪖 {operation.name}
 
 📅 {operation.date}
+
+{"🔒 Signups locked" if locked else "🟢 Signups open"}
 
 {operation.desc}
 
@@ -229,23 +231,13 @@ def DisplayOperation(operation: Operation):
     ]
     # adding orbat link
     if operation.has_orbat:
-        items.append(
-            create_text(
-                f"\n-# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})"
-            )
-        )
+        items.append(create_text(f"\n-# 📋 [Attendance & ORBAT]({spreadsheet_url(operation.spreadsheet_id)})"))
     # adding image
     image_urls = json.loads(operation.image_url) if operation.image_url else []
     if image_urls:
         items.append(create_image(*image_urls))
 
-    items.extend(
-        [
-            create_separator(),
-            create_text(
-                "To sign up do `/signup` and follow the prompts. <@&1473741029638410313>"
-            ),
-        ]
-    )
+    if not locked:
+        items += [create_separator(), create_text("Ready to deploy? Run `/signup` and follow the prompts.")]
 
     return {"items": items}
