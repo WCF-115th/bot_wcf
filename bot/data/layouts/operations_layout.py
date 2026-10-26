@@ -6,7 +6,6 @@ from functools import partial
 import discord
 from discord import components
 
-from bot.data.layouts.edit_op_layout import EditOperation, update_op_post
 from bot.data.models import Operation
 from bot.services.db.queries_tur import count_signups
 from bot.services.operations import add_operation_thread_id, create_operation, link_operation_sheet, make_operation_orbatless
@@ -186,6 +185,8 @@ class SheetLinkModal(discord.ui.Modal, title="Link Sheet"):
         self.operation_id = operation_id
 
     async def on_submit(self, interaction: discord.Interaction):
+        from bot.data.layouts.edit_op_layout import EditOperation, update_op_post
+
         try:
             await interaction.response.defer(ephemeral=True)
 
@@ -238,6 +239,6 @@ def DisplayOperation(operation: Operation):
         items.append(create_image(*image_urls))
 
     if not locked:
-        items += [create_separator(), create_text("Ready to deploy? Run `/signup` and follow the prompts.")]
+        items += [create_separator(), create_text("Ready to deploy? Run `/signup` and follow the prompts. <@&1473741029638410313>")]
 
     return {"items": items}

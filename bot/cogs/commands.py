@@ -181,9 +181,12 @@ class Commands(commands.Cog):
     @app_commands.command(name="editop", description="(Zeus) Edit or lock the operation in this thread")
     @requires(zeus_only, in_op_thread)
     async def _command_editop(self, interaction: discord.Interaction):
-        operation = await Operation.fetch_by_thread(interaction.channel_id)
-        count = await count_signups(operation.id)
-        await interaction.response.send_message(view=EditOperation(operation, count), ephemeral=True)
+        try:
+            operation = await Operation.fetch_by_thread(interaction.channel_id)
+            count = await count_signups(operation.id)
+            await interaction.response.send_message(view=EditOperation(operation, count), ephemeral=True)
+        except:
+            print(traceback.format_exc())
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):

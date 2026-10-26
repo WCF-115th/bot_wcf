@@ -56,7 +56,7 @@ def EditOperation(operation: Operation, signup_count: int):
 {"🔒 Signups locked" if locked else "🟢 Signups open"}
 
 > 👥 Signed up: **{signup_count}**
-> 🖼️ Images: **{len(operation.images or [])}**
+> 🖼️ Images: **{len(operation.image_url or [])}**
 > 📋 {orbat}
 """),
     ]
@@ -71,7 +71,7 @@ def EditOperation(operation: Operation, signup_count: int):
     return {"items": items, "extra": [_action_row(*buttons)]}
 
 
-async def _update_op_post(client: discord.Client, operation: Operation, rename: bool = False):
+async def update_op_post(client: discord.Client, operation: Operation, rename: bool = False):
     """Refresh the public op post (and thread name) after a change."""
     try:
         thread = await client.fetch_channel(operation.signup_thread_id)
@@ -95,7 +95,7 @@ async def toggle_lock_callback(interaction: discord.Interaction, operation_id: i
     await update_operation(operation.id, status=new_status)
 
     operation = await Operation.fetch(operation_id)
-    await _update_op_post(interaction.client, operation)
+    await update_op_post(interaction.client, operation)
     await interaction.edit_original_response(view=EditOperation(operation, await count_signups(operation.id)))
 
 
@@ -146,7 +146,7 @@ class EditOperationModal(discord.ui.Modal, title="Edit operation"):
 
             await update_operation(self.operation_id, **fields)
             operation = await Operation.fetch(self.operation_id)
-            await _update_op_post(interaction.client, operation, rename=True)
+            await update_op_post(interaction.client, operation, rename=True)
             await interaction.edit_original_response(view=EditOperation(operation, await count_signups(operation.id)))
         except Exception:
             print(traceback.format_exc())
