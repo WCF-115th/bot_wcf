@@ -4,4 +4,4 @@ flask
 libsql_client
 google-auth
 google-api-python-client
-
+colored

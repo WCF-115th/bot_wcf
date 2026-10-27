@@ -18,8 +18,6 @@ async def init_db():
     exists. Safe to call on every bot startup — uses IF NOT EXISTS, so
     existing tables/data are never touched.
     """
-    print("URL set:", bool(os.environ.get("TURSO_DATABASE_URL")))
-    print("TOKEN set:", bool(os.environ.get("TURSO_AUTH_TOKEN")))
     global _client
     _client = libsql_client.create_client(
         url=os.environ["TURSO_DATABASE_URL"].replace("libsql://", "https://"),
@@ -27,18 +25,14 @@ async def init_db():
     )
 
     for table, definition in SCHEMA.items():
-        cols = ", ".join(
-            f"{name} {dtype}" for name, dtype in definition["columns"].items()
-        )
+        cols = ", ".join(f"{name} {dtype}" for name, dtype in definition["columns"].items())
         extra = ""
         if "primary_key" in definition:
             pk_cols = ", ".join(definition["primary_key"])
             extra = f", PRIMARY KEY ({pk_cols})"
         await _client.execute(f"CREATE TABLE IF NOT EXISTS {table} ({cols}{extra})")
 
-    result = await get_connection().execute(
-        "SELECT name FROM sqlite_master WHERE type='table'"
-    )
+    result = await get_connection().execute("SELECT name FROM sqlite_master WHERE type='table'")
 
 
 async def migrate_db():
@@ -53,9 +47,7 @@ async def migrate_db():
         existing_cols = {row[1] for row in result.rows}
         for col_name, col_type in definition["columns"].items():
             if col_name not in existing_cols:
-                await client.execute(
-                    f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}"
-                )
+                await client.execute(f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}")
 
 
 def get_connection() -> libsql_client.Client:
