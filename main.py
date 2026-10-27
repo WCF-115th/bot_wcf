@@ -7,7 +7,6 @@ from pathlib import Path
 
 import discord
 import dotenv
-from colored import Fore, Style
 from discord.ext import commands
 
 import server
