@@ -135,7 +135,7 @@ class Commands(commands.Cog):
             print(traceback.format_exc())
 
     @app_commands.command(name="chud", description="Call someone a chud")
-    @requires(abstract)
+    @requires(privileges)
     async def _command_chud(self, interaction: discord.Interaction, member: discord.Member | None = None):
         member = member or interaction.user
         await interaction.response.send_message(f"{member.mention} is a chud")

@@ -61,9 +61,11 @@ async def not_orbatless_op(interaction: discord.Interaction):
     return True, None
 
 
-async def abstract(interaction: discord.Interaction):
+async def privileges(interaction: discord.Interaction):
     if interaction.user.id == 317580648074313728:
         return False, "You lost your chud privileges abstract..."
+    elif interaction.user.id == 1180697002632302713:
+        return False, "You lost your chud privileges spindly..."
     return True, None
 
 
