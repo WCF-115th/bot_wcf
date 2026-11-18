@@ -130,7 +130,7 @@ class Commands(commands.Cog):
     async def _command_strike(self, interaction: discord.Interaction, member: discord.Member):
         try:
             player = await Player.fetch(interaction.guild_id, member.id)
-            await interaction.response.send_message(view=StrikeLayout(player), ephemeral=True)
+            await interaction.channel.send(view=StrikeLayout(player), ephemeral=True)
         except Exception:
             print(traceback.format_exc())
 
