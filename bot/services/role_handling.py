@@ -238,11 +238,7 @@ def available_roles(member: discord.Member, role_list: dict) -> list:
                 available[role_name] = requirement.get("description", "")
         elif isinstance(requirement, list):
             matching = next(
-                (
-                    req
-                    for req in requirement
-                    if check_eligibility(user_rank, user_certs, req)
-                ),
+                (req for req in requirement if check_eligibility(user_rank, user_certs, req)),
                 None,
             )
             if matching:
@@ -253,7 +249,7 @@ def available_roles(member: discord.Member, role_list: dict) -> list:
 
 def extract_roles(answers: dict) -> tuple[str, str, str]:
     return (
-        answers.get("role_select_1", ""),
-        answers.get("role_select_2", ""),
-        answers.get("role_select_3", ""),
+        answers.get("role_select_1", "Fill"),
+        answers.get("role_select_2", "Fill"),
+        answers.get("role_select_3", "Fill"),
     )
